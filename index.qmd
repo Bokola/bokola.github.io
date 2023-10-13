@@ -3,7 +3,7 @@ title: ""
 image: images/owiti.jpg
 toc: false
 about: 
-  template: jolla
+  template: trestles
   image-shape: round
   image-width: 14em
   links:
@@ -18,9 +18,41 @@ about:
       href: https://github.com/bokola
     - icon: envelope
       text: Email
-      href: mailto:sbokola214@gmail.com
+      href: mailto:bokola214@gmail.com
 ---
 
 Hello!
 
-Welcome to my personal (work in progress) site. I am a student enrolled in a Master of Science degree in Statistics and data science, specializing in biostatistics. I use R, SAS, and Python for statistical analysis and visualizations. Kindly find some of those in the portfolio tab
+Welcome to my personal (work in progress) site. I am a student enrolled in a Master of Science degree in Statistics and data science, specializing in biostatistics. I use R, SAS, and Python for statistical analysis and visualizations. Working on building an understanding of spatial statistics, infectious diseases modelling and computational statistics with C, C++.
+
+### education
+
+<div class="topbr">
+
+<p class="custom-subtitle"> MS in Biostatistics, 2020 - Ongoing|Hasselt University </p>
+
+<!-- <p class="custom-subtitle2">Hasselt University</p> -->
+
+<p class="custom-subtitle"> BS in Applied Statistics, 2015|Maseno University</p>
+
+<!-- <p class="custom-subtitle2"\>Maseno University\</p\> -->
+
+</div>
+
+### experience
+
+<div class="topbr">
+
+<p class="custom-subtitle"> Research Assistant, 2022-2023|Karolinska Institutet</p>
+
+<!-- <p class="custom-subtitle2">Karolinska Institutet</p> -->
+
+<p class="custom-subtitle"> Data Manager, 2022-2022|Kenya Medical Research Institute</p>
+
+<!-- <p class="custom-subtitle2">Kenya Medical Research Institute</p> -->
+
+<p class="custom-subtitle"> Data Manager, 2018-2020|KEMRI - Wellcome Trust Research Programme</p>
+
+<!-- <p class="custom-subtitle2">KEMRI - Wellcome Trust Research Programme</p> -->
+
+</div>
