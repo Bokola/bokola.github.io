@@ -47,7 +47,7 @@ Add recommended imports (see 10) and `check()`
 20. `test()` or ctr + shift + T runs all tests in your test/ directory. The workflow updates to 
 load_all() -> test() -> document() -> check(). Tests should be small and run quickly.
 21. Dependencies, add imports in DESCRIPTION with `use_package()`.
-22. Add README with `use_readme()_rmd()`
+22. Add README with `use_readme_rmd()`
 23. Render readme.rmd with `build_readme()`
 24. Use continuous integration with `use_github_action()` then build_readme() again
 25 Build a website for your package with `use_pkgdown_github_pages()` then document().
