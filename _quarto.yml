@@ -3,13 +3,23 @@ project:
   output-dir: docs
 
 website:
-  title: "Basil Okola"
+  # title: "Basil Okola"
+  open-graph: true
+  site-url: https://bokola.github.io/
   navbar:
-    left:
+    title: false
+    right:
       - href: index.qmd
         text: Home
       # - about.qmd
       - resources.qmd
+      - href: CV/CV-Basil-Owiti-Okola.pdf
+      - text: cv
+      - target: _blank
+      - posts.qmd
+page-footer:
+execute: 
+  background: light
 
 format:
   html:

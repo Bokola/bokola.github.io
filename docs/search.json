@@ -4,7 +4,7 @@
     "href": "resources.html",
     "title": "resources",
     "section": "",
-    "text": "Samantha’s quarto website tutorial\nMastering Shiny, by Hadley Wickham\nHappy Git and GitHub for the useR, by Jenny Bryan\nR for Data Science, by Hadley Wickham\nHitchhiker’s Guide to Python, by Kenneth Reitz & Tanya Schlusser\nData wrangling essentials: comparisons in JavaScript, Python, SQL, R, and Excel, by Allison Horst & Paul Buffa\nW3Schools, particularly for their HTML & CSS tutorials"
+    "text": "Samantha’s quarto website tutorial\nSamantha’s quarto blog posts tutorial\nMastering Shiny, by Hadley Wickham\nHappy Git and GitHub for the useR, by Jenny Bryan\nR for Data Science, by Hadley Wickham\nHitchhiker’s Guide to Python, by Kenneth Reitz & Tanya Schlusser\nData wrangling essentials: comparisons in JavaScript, Python, SQL, R, and Excel, by Allison Horst & Paul Buffa\nW3Schools, particularly for their HTML & CSS tutorials\nJayde’s parameterized reports with quarto\nMine’s quarto manuscripts"
   },
   {
     "objectID": "about.html",
@@ -16,7 +16,7 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Basil Okola",
+    "title": "",
     "section": "",
     "text": "Hello!\nWelcome to my personal (work in progress) site. I am a student enrolled in a Master of Science degree in Statistics and data science, specializing in biostatistics. I use R, SAS, and Python for statistical analysis and visualizations. Working on building an understanding of spatial statistics, infectious diseases modelling and computational statistics with C, C++.\n\neducation\n\n\nMS in Biostatistics, 2020 - Ongoing|Hasselt University\n\n\n\nBS in Applied Statistics, 2015|Maseno University\n\n\n\n\n\nexperience\n\n\nResearch Assistant, 2022-2023|Karolinska Institutet\n\n\n\nData Manager, 2022-2022|Kenya Medical Research Institute\n\n\n\nData Manager, 2018-2020|KEMRI - Wellcome Trust Research Programme"
   }

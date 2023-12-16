@@ -6,6 +6,9 @@ title-block-banner: true
 
 
 * [Samantha's quarto website tutorial](https://ucsb-meds.github.io/creating-quarto-websites/)
+
+*  [Samantha's quarto blog posts tutorial](https://samanthacsik.github.io/posts/2022-10-24-quarto-blogs/)
+
 * [Mastering Shiny](https://mastering-shiny.org/index.html), by Hadley Wickham 
 
 * [Happy Git and GitHub for the useR](https://happygitwithr.com/), by Jenny Bryan
@@ -17,3 +20,8 @@ title-block-banner: true
 * [Data wrangling essentials: comparisons in JavaScript, Python, SQL, R, and Excel](https://observablehq.com/@observablehq/data-wrangling-translations), by Allison Horst & Paul Buffa
 
 * [W3Schools](https://www.w3schools.com/default.asp), particularly for their HTML & CSS tutorials
+
+
+* [Jayde's parameterized reports with quarto](https://github.com/jadeynryan/2023_posit-parameterized-quarto)
+
+* [Mine's quarto manuscripts](https://github.com/mine-cetinkaya-rundel/quarto-manuscripts)
