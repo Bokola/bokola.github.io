@@ -2,6 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://bokola.github.io/index.html</loc>
-    <lastmod>2023-12-16T10:43:26.355Z</lastmod>
+    <lastmod>2023-12-16T12:06:22.735Z</lastmod>
+  </url>
+  <url>
+    <loc>https://bokola.github.io/posts.html</loc>
+    <lastmod>2023-12-16T12:26:04.947Z</lastmod>
+  </url>
+  <url>
+    <loc>https://bokola.github.io/resources.html</loc>
+    <lastmod>2023-12-16T11:41:17.931Z</lastmod>
+  </url>
+  <url>
+    <loc>https://bokola.github.io/posts/2023-12-16-R-package dev/index.html</loc>
+    <lastmod>2023-12-16T12:26:04.130Z</lastmod>
   </url>
 </urlset>

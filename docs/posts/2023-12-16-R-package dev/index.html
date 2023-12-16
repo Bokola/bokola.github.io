@@ -6,8 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Basil Okola">
+<meta name="dcterms.date" content="2023-12-16">
+<meta name="description" content="Writing R packages using devtools, roxygen2 and usethis packages">
 
-<title></title>
+<title>R package development guide</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,21 +26,22 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -60,10 +64,9 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
-<meta property="og:title" content="">
-<meta property="og:description" content="">
-<meta property="og:image" content="https://bokola.github.io/images/owiti.jpg">
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="R package development guide">
+<meta property="og:description" content="Writing R packages using devtools, roxygen2 and usethis packages">
 </head>
 
 <body class="nav-fixed">
@@ -79,15 +82,15 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" rel="" target="" aria-current="page">
+    <a class="nav-link" href="../../index.html" rel="" target="">
  <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./resources.html" rel="" target="">
+    <a class="nav-link" href="../../resources.html" rel="" target="">
  <span class="menu-text">resources</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./posts.html" rel="" target="">
+    <a class="nav-link" href="../../posts.html" rel="" target="">
  <span class="menu-text">posts</span></a>
   </li>  
 </ul>
@@ -98,72 +101,111 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page">
+      <h1 class="title">R package development guide</h1>
+                  <div>
+        <div class="description">
+          Writing R packages using devtools, roxygen2 and usethis packages
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Quarto</div>
+                <div class="quarto-category">R</div>
+                <div class="quarto-category">packages</div>
+              </div>
+                  </div>
+  </div>
+    
+  <div class="quarto-title-meta-author">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <p class="author"><a href="https://bokola.github.io/">Basil Okola</a> </p>
+    </div>
+      <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              <a href="https://ucsb-meds.github.io/">
+              Master of Statistics and Data Science @ Hasselt University
+              </a>
+            </p>
+        </div>
+      </div>
+
+  <div class="quarto-title-meta">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">December 16, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
+    </div>
 <!-- main -->
-<div class="quarto-about-trestles column-page">
-  <div class="about-entity">
-    <img src="images/owiti.jpg" class="about-image
-  round " style="height: 14em; width: 14em;">
-    <div class="about-links">
-  <a href="https://www.linkedin.com/in/basil-owiti-8a32347a/" class="about-link" rel="" target="">
-    <i class="bi bi-linkedin"></i>
-     <span class="about-link-text">LinkedIn</span>
-  </a>
-  <a href="https://twitter.com/okolaowiti" class="about-link" rel="" target="">
-    <i class="bi bi-twitter"></i>
-     <span class="about-link-text">Twitter</span>
-  </a>
-  <a href="https://github.com/bokola" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">GitHub</span>
-  </a>
-  <a href="mailto:bokola214@gmail.com" class="about-link" rel="" target="">
-    <i class="bi bi-envelope"></i>
-     <span class="about-link-text">Email</span>
-  </a>
-</div>
-  </div>
-  <div class="about-contents"><main class="content column-page" id="quarto-document-content">
-<p>Hello!</p>
-<p>Welcome to my personal (work in progress) site. I am a student enrolled in a Master of Science degree in Statistics and data science, specializing in biostatistics. I use R, SAS, and Python for statistical analysis and visualizations. Working on building an understanding of spatial statistics, infectious diseases modelling and computational statistics with C, C++.</p>
-<section id="education" class="level3">
-<h3 data-anchor-id="education">education</h3>
-<div class="topbr">
-<p class="custom-subtitle">
-MS in Biostatistics, 2020 - Ongoing|Hasselt University
-</p>
-<!-- <p class="custom-subtitle2">Hasselt University</p> -->
-<p class="custom-subtitle">
-BS in Applied Statistics, 2015|Maseno University
-</p>
-<!-- <p class="custom-subtitle2"\>Maseno University\</p\> -->
-</div>
-</section>
-<section id="experience" class="level3">
-<h3 data-anchor-id="experience">experience</h3>
-<div class="topbr">
-<p class="custom-subtitle">
-Research Assistant, 2022-2023|Karolinska Institutet
-</p>
-<!-- <p class="custom-subtitle2">Karolinska Institutet</p> -->
-<p class="custom-subtitle">
-Data Manager, 2022-2022|Kenya Medical Research Institute
-</p>
-<!-- <p class="custom-subtitle2">Kenya Medical Research Institute</p> -->
-<p class="custom-subtitle">
-Data Manager, 2018-2020|KEMRI - Wellcome Trust Research Programme
-</p>
-<!-- <p class="custom-subtitle2">KEMRI - Wellcome Trust Research Programme</p> -->
-</div>
+<main class="content quarto-banner-title-block column-page" id="quarto-document-content">
 
 
-</section>
-</main></div>
-</div>
- <!-- /main -->
+
+
+<p>These are quick step-by-step guides I wrote when going through <a href="https://github.com/posit-conf-2023/pkg-dev">Andy’s fundamentas of package development notes</a>.</p>
+<ol type="1">
+<li>Initialize package dev files with <code>devtools::create_package()</code> which creates mandatory file for the package</li>
+<li>Enable git tracking:
+<ul>
+<li>configure: usethis::use_git_configure()</li>
+<li>commit: usethis::use_git()</li>
+</ul></li>
+<li>Fill in sections of the DESCRIPTION file. <code>{roxygen2}</code> is used to actualize this.</li>
+<li>Edit.Rprofile() to set options you’ll use in the documentation such as author details. This uses <code>usethis::edit_r_profile()</code></li>
+<li>Create a separate R file for each function you’ll be including in the package. Use <code>use_r("/path-to-file/R/function-name.R")</code></li>
+<li>Load the functions with <code>devtools::load_all()</code></li>
+<li>Check the loaded files with <code>check()</code> which runs R CMD checks to catch errors/warnings/notes that need addressing.</li>
+<li>Add files you don’t wish to include in the package build-in <code>.Rbuildignore</code> file.</li>
+<li>Enable roxygen2 to be used for package documentation: project options -&gt; Build Tools -&gt; check to generate documentation with roxygen or better <code>devtools::document()</code> which generates NAMESPACE automatically</li>
+<li>Automate external function imports with <code>usethis::use_import_from()</code>: example <strong>usethis::use_import_from(“utils”, “install.packages”)</strong></li>
+<li>Document functions: put the cursor inside the R function definition and ctrl+shift+alt+R to insert the roxygen skeleton. The workflow here is after documenting -&gt; load_all() -&gt; document() -&gt; check()</li>
+<li>Data files go to /data dir. It should be of .rda format</li>
+<li>External (non .rda format) data go to /inst/extdata/. Document them in the R file e.g.&nbsp;<strong>data.R</strong> and store it in /R. <code>load_all()</code> then <code>document()</code></li>
+<li>Call <code>use_package_doc()</code> to add a dummy .R file that will prompt roxygen to generate basic package-level documentation. I noticed doing this erased imports in <code>{package-name}-package.R</code> file. Add recommended imports (see 10) and <code>check()</code></li>
+<li>Install your package with <code>devtools::install()</code></li>
+<li>Attach your package as with other packages by calling <code>library()</code></li>
+<li>Testing: Using the edit code -&gt; load_all() -&gt; experiment iteration can be unsustainable if you come back to your code months after development. You should write <strong>formal tests</strong> supported by <code>{testthat}</code> package.</li>
+<li>Set up formal testing of your package with <code>usethis::use_testthat()</code>. Creates a folder /tests. Don’t edit tests/testhat.R</li>
+<li>Call <code>usethis::use_test()</code> e.g., <code>use_test("install_load_packages.R")</code> to edit tests for functions living in a particular R file in R/.</li>
+<li><code>test()</code> or ctr + shift + T runs all tests in your test/ directory. The workflow updates to load_all() -&gt; test() -&gt; document() -&gt; check(). Tests should be small and run quickly.</li>
+<li>Dependencies, add imports in DESCRIPTION with <code>use_package()</code>.</li>
+<li>Add README with <code>use_readme()_rmd()</code></li>
+<li>Render readme.rmd with <code>build_readme()</code></li>
+<li>Use continuous integration with <code>use_github_action()</code> then build_readme() again 25 Build a website for your package with <code>use_pkgdown_github_pages()</code> then document().</li>
+</ol>
+
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{okola2023,
+  author = {Okola, Basil},
+  title = {R Package Development Guide},
+  date = {2023-12-16},
+  url = {https://bokola.github.io/posts/2023-12-16-R-package dev/},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-okola2023" class="csl-entry quarto-appendix-citeas" role="listitem">
+Okola, Basil. 2023. <span>“R Package Development Guide.”</span> December
+16, 2023. <a href="https://bokola.github.io/posts/2023-12-16-R-package dev/">https://bokola.github.io/posts/2023-12-16-R-package
+dev/</a>.
+</div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -184,6 +226,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
   const isCodeAnnotation = (el) => {
     for (const clz of el.classList) {
       if (clz.startsWith('code-annotation-')) {                     
