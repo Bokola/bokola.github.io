@@ -23,7 +23,7 @@ about:
 
 Hello!
 
-Welcome to my personal (work in progress) site. I am a student enrolled in a Master of Science degree in Statistics and data science, specializing in biostatistics. I use R, SAS, and Python for statistical analysis and visualizations. Working on building an understanding of spatial statistics, infectious diseases modelling and computational statistics with C, C++.
+Welcome to my personal (work in progress) site. I am a student enrolled in a Master of Science degree in Statistics and data science, specializing in biostatistics. I use R, SAS, and Python for statistical analysis and visualizations. My interest is statistical computing applied to spatial statistics, infectious diseases modelling and Bayesian data analysis.
 
 ### education
 
@@ -42,6 +42,8 @@ Welcome to my personal (work in progress) site. I am a student enrolled in a Mas
 ### experience
 
 <div class="topbr">
+
+<p class="custom-subtitle"> Biometrician, 2024-present|International Potato Center (CIP)</p>
 
 <p class="custom-subtitle"> Research Assistant, 2022-2023|Karolinska Institutet</p>
 
