@@ -4,6 +4,7 @@ subtitle: "a collection of other people's writings, tutorials, etc. that I use o
 title-block-banner: true
 ---
 
+* [Rodrigues' Reproducible Analytical Pipelines in R](https://raps-with-r.dev/)
 
 * [Samantha's quarto website tutorial](https://ucsb-meds.github.io/creating-quarto-websites/)
 

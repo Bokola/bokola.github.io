@@ -18,7 +18,7 @@ The packaged is named [`pbwrangler`](https://bokola.github.io/pbwrangler/), it's
 
 # Reproducible anaytical pipelines in R
 
-This was a 'do it yourself too' as I was reading an online version of [Rodrigues' reproducible piplines text](https://raps-with-r.dev/) . It reinforced my understanding of package development powered by `{fusen}`, reproducibility of package versions using `{renv}`, reproducible pipelines with `{targets}`, building and sharing docker containers in dockerhub and github, and continuous integration/development (CI/CD) using github actions
+This was a 'do it yourself too' as I was reading an online version of [Rodrigues' reproducible piplines text](https://raps-with-r.dev/) . It reinforced my understanding of package development powered by `{fusen}`, reproducibility of package versions using `{renv}`, reproducible pipelines with `{targets}`, building and sharing docker containers in dockerhub and github, and continuous integration/development (CI/CD) using github actions. A branch with CI/CD running a docker container can be found [here](https://github.com/Bokola/Reproducible-analytical-pipelines-R/tree/rap-docker-ga).
 
 
 
