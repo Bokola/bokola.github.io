@@ -4,8 +4,8 @@ title: "Portfolio"
 
 # R package development
 
-I developed best practices in programming: using a secluded development environment made possible by `{renv}` package
-and Rstudio's project initialization functionality and documenting your functions. Package development workflow included
+Taking on package development inculcates in one best practices in programming: using a secluded development environment made possible by `{renv}` package
+and Rstudio's project initialization functionality, documenting code, shared data and publishing user guides to get people started with the software. Package development workflow included
 `{fussen}`, `{roxygen2}`, and `{devtools}`
 
 The packaged is named [`pbwrangler`](https://bokola.github.io/pbwrangler/), it's goal to document functions used in reading, processing and writing field experimental data in potato breeding. 
@@ -14,7 +14,7 @@ The packaged is named [`pbwrangler`](https://bokola.github.io/pbwrangler/), it's
 # Shiny web app
 
 
-{shiny} is undoubtedly a go to tool for building a web app that runs in production or just for presenting a proof of concept. I developed a [small app](https://bokola.shinyapps.io/shinyApp-data-quality/) as proof that I understand the underlying framework to be able to build an app that can be used in production.
+`{shiny}` is undoubtedly a go to tool for building a web app that runs in production or just for presenting a proof of concept. I developed a [small app](https://bokola.shinyapps.io/shinyApp-data-quality/) as proof that I understand the underlying framework to be able to build an app that can be used in production.
 
 # Reproducible anaytical pipelines in R
 
