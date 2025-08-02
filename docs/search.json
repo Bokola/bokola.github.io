@@ -25,7 +25,7 @@
     "href": "posts.html",
     "title": "posts",
     "section": "",
-    "text": "R package development guide\n\n\n\n\n\n\nQuarto\n\n\nR\n\n\npackages\n\n\n\nWriting R packages using devtools, roxygen2 and usethis packages\n\n\n\n\n\nDec 16, 2023\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nEnd-to-end Machine Learning (MLflow + Docker + Google Cloud)\n\n\n\n\n\n\nQuarto\n\n\nPython\n\n\nMLflow\n\n\n\nWriting R packages using devtools, roxygen2 and usethis packages\n\n\n\n\n\nDec 16, 2023\n\n\nBasil Okola\n\n\n\n\n\n\nNo matching items"
+    "text": "End-to-end Machine Learning (MLflow + Docker + Google Cloud)\n\n\n\n\n\n\nQuarto\n\n\nPython\n\n\nMLflow\n\n\n\nWriting R packages using devtools, roxygen2 and usethis packages\n\n\n\n\n\nAug 2, 2025\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nR package development guide\n\n\n\n\n\n\nQuarto\n\n\nR\n\n\npackages\n\n\n\nWriting R packages using devtools, roxygen2 and usethis packages\n\n\n\n\n\nDec 16, 2023\n\n\nBasil Okola\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/2023-12-16-R-package dev/index.html",
@@ -39,7 +39,7 @@
     "href": "posts/2025-08-02-End-to-end-ML-with-MLflow/index.html",
     "title": "End-to-end Machine Learning (MLflow + Docker + Google Cloud)",
     "section": "",
-    "text": "BibTeX citation:@online{okola2023,\n  author = {Okola, Basil},\n  title = {End-to-End {Machine} {Learning} {(MLflow} + {Docker} +\n    {Google} {Cloud)}},\n  date = {2023-12-16},\n  url = {https://bokola.github.io/posts/2025-08-02-End-to-end-ML-with-MLflow/},\n  langid = {en}\n}\nFor attribution, please cite this work as:\nOkola, Basil. 2023. “End-to-End Machine Learning (MLflow + Docker\n+ Google Cloud).” December 16, 2023. https://bokola.github.io/posts/2025-08-02-End-to-end-ML-with-MLflow/.\nThis is an account of my learning journey aided by this tutorial to grasp the nitty-gritties of buliding, logging, saving and serving machine learning models. First is a description of the development environment used."
+    "text": "BibTeX citation:@online{okola2025,\n  author = {Okola, Basil},\n  title = {End-to-End {Machine} {Learning} {(MLflow} + {Docker} +\n    {Google} {Cloud)}},\n  date = {2025-08-02},\n  url = {https://bokola.github.io/posts/2025-08-02-End-to-end-ML-with-MLflow/},\n  langid = {en}\n}\nFor attribution, please cite this work as:\nOkola, Basil. 2025. “End-to-End Machine Learning (MLflow + Docker\n+ Google Cloud).” August 2, 2025. https://bokola.github.io/posts/2025-08-02-End-to-end-ML-with-MLflow/.\nThis is an account of my learning journey aided by this tutorial to grasp the nitty-gritties of buliding, logging, saving and serving machine learning models. First is a description of the development environment used."
   },
   {
     "objectID": "posts/2025-08-02-End-to-end-ML-with-MLflow/index.html#development-environment",
