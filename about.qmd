@@ -4,21 +4,21 @@ title: "Portfolio"
 
 # R package development
 
-Taking on package development inculcates in one best practices in programming: using a secluded development environment made possible by `{renv}` package
-and Rstudio's project initialization functionality, documenting code, shared data and publishing user guides to get people started with the software. Package development workflow included
-`{fussen}`, `{roxygen2}`, and `{devtools}`
+Taking on package development inculcates in one best practices in programming: using a secluded development environment made possible by `{renv}` package and Rstudio's project initialization functionality, documenting code, shared data and publishing user guides to get people started with the software. Package development workflow included `{fussen}`, `{roxygen2}`, and `{devtools}`
 
-The packaged is named [`pbwrangler`](https://bokola.github.io/pbwrangler/), it's goal to document functions used in reading, processing and writing field experimental data in potato breeding. 
-
+The packaged is named [`pbwrangler`](https://bokola.github.io/pbwrangler/), it's goal to document functions used in reading, processing and writing field experimental data in potato breeding.
 
 # Shiny web app
 
-
 `{shiny}` is undoubtedly a go to tool for building a web app that runs in production or just for presenting a proof of concept. I developed a [small app](https://bokola.shinyapps.io/shinyApp-data-quality/) as proof that I understand the underlying framework to be able to build an app that can be used in production.
 
-# Reproducible anaytical pipelines in R
+# Reproducible analytical pipelines in R
 
 This was a 'do it yourself too' as I was reading an online version of [Rodrigues' reproducible piplines text](https://raps-with-r.dev/) . It reinforced my understanding of package development powered by `{fusen}`, reproducibility of package versions using `{renv}`, reproducible pipelines with `{targets}`, building and sharing docker containers in dockerhub and github, and continuous integration/development (CI/CD) using github actions. A branch with CI/CD running a docker container can be found [here](https://github.com/Bokola/Reproducible-analytical-pipelines-R/tree/rap-docker-ga).
+
+# End-to-end Machine Learning (MLflow + Docker + Google cloud)
+
+This is an account of my learning journey aided by [this](https://mlflow.org/docs/latest/ml/getting-started/hyperparameter-tuning/) tutorial to grasp the nitty-gritties of buliding, logging, saving and serving machine learning models. The code available at this [repo](https://github.com/Bokola/DeepLearn/tree/main/MLflow) and a write-up is [here](http://bokola.github.io/posts.html/2025-08-02-End-to-end-ML-with-MLflow/).
 
 
 

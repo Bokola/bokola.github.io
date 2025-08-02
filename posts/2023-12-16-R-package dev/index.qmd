@@ -17,37 +17,29 @@ draft: false # setting this to `true` will prevent your post from appearing on y
 
 These are quick step-by-step guides I wrote when going through [Andy's fundamentas of package development notes](https://github.com/posit-conf-2023/pkg-dev).
 
-
-1. Initialize package dev files with `devtools::create_package()` which creates mandatory file for the package
-2. Enable git tracking:
-	- configure: usethis::use_git_configure()
-	- commit: usethis::use_git()
-3. Fill in sections of the DESCRIPTION file. `{roxygen2}` is used to actualize this.
-4. Edit.Rprofile() to set options you'll use in the documentation such as author details. This uses `usethis::edit_r_profile()`
-5. Create a separate R file for each function you'll be including in the package. Use `use_r("/path-to-file/R/function-name.R")`
-6. Load the functions with `devtools::load_all()`
-7. Check the loaded files with `check()` which runs R CMD checks to catch errors/warnings/notes that need addressing.
-8. Add files you don't wish to include in the package build-in `.Rbuildignore` file.
-9. Enable roxygen2 to be used for package documentation: project options -> Build Tools -> check to generate documentation with roxygen or better `devtools::document()` which generates NAMESPACE
-automatically
-10. Automate external function imports with `usethis::use_import_from()`: example
-**usethis::use_import_from("utils", "install.packages")**
-11. Document functions: put the cursor inside the R function definition and ctrl+shift+alt+R to
- insert the roxygen skeleton. The workflow here is after documenting -> load_all() -> document() -> check()
+1.  Initialize package dev files with `devtools::create_package()` which creates mandatory file for the package
+2.  Enable git tracking:
+    -   configure: usethis::use_git_configure()
+    -   commit: usethis::use_git()
+3.  Fill in sections of the DESCRIPTION file. `{roxygen2}` is used to actualize this.
+4.  Edit.Rprofile() to set options you'll use in the documentation such as author details. This uses `usethis::edit_r_profile()`
+5.  Create a separate R file for each function you'll be including in the package. Use `use_r("/path-to-file/R/function-name.R")`
+6.  Load the functions with `devtools::load_all()`
+7.  Check the loaded files with `check()` which runs R CMD checks to catch errors/warnings/notes that need addressing.
+8.  Add files you don't wish to include in the package build-in `.Rbuildignore` file.
+9.  Enable roxygen2 to be used for package documentation: project options -\> Build Tools -\> check to generate documentation with roxygen or better `devtools::document()` which generates NAMESPACE automatically
+10. Automate external function imports with `usethis::use_import_from()`: example **usethis::use_import_from("utils", "install.packages")**
+11. Document functions: put the cursor inside the R function definition and ctrl+shift+alt+R to insert the roxygen skeleton. The workflow here is after documenting -\> load_all() -\> document() -\> check()
 12. Data files go to /data dir. It should be of .rda format
 13. External (non .rda format) data go to /inst/extdata/. Document them in the R file e.g. **data.R** and store it in /R. `load_all()` then `document()`
-14. Call `use_package_doc()` to add a dummy .R file that will prompt roxygen to generate basic package-level documentation. I noticed doing this erased imports in `{package-name}-package.R` file.
-Add recommended imports (see 10) and `check()`
+14. Call `use_package_doc()` to add a dummy .R file that will prompt roxygen to generate basic package-level documentation. I noticed doing this erased imports in `{package-name}-package.R` file. Add recommended imports (see 10) and `check()`
 15. Install your package with `devtools::install()`
 16. Attach your package as with other packages by calling `library()`
-17. Testing: Using the edit code -> load_all() -> experiment iteration can be unsustainable if you come back to your code months after development. You should write **formal tests** supported by 
-`{testthat}` package.
+17. Testing: Using the edit code -\> load_all() -\> experiment iteration can be unsustainable if you come back to your code months after development. You should write **formal tests** supported by `{testthat}` package.
 18. Set up formal testing of your package with `usethis::use_testthat()`. Creates a folder /tests. Don't edit tests/testhat.R
 19. Call `usethis::use_test()` e.g., `use_test("install_load_packages.R")` to edit tests for functions living in a particular R file in R/.
-20. `test()` or ctr + shift + T runs all tests in your test/ directory. The workflow updates to 
-load_all() -> test() -> document() -> check(). Tests should be small and run quickly.
+20. `test()` or ctr + shift + T runs all tests in your test/ directory. The workflow updates to load_all() -\> test() -\> document() -\> check(). Tests should be small and run quickly.
 21. Dependencies, add imports in DESCRIPTION with `use_package()`.
 22. Add README with `use_readme_rmd()`
 23. Render readme.rmd with `build_readme()`
-24. Use continuous integration with `use_github_action()` then build_readme() again
-25 Build a website for your package with `use_pkgdown_github_pages()` then document().
+24. Use continuous integration with `use_github_action()` then build_readme() again 25 Build a website for your package with `use_pkgdown_github_pages()` then document().

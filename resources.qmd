@@ -4,25 +4,24 @@ subtitle: "a collection of other people's writings, tutorials, etc. that I use o
 title-block-banner: true
 ---
 
-* [Rodrigues' Reproducible Analytical Pipelines in R](https://raps-with-r.dev/)
+-   [Rodrigues' Reproducible Analytical Pipelines in R](https://raps-with-r.dev/)
 
-* [Samantha's quarto website tutorial](https://ucsb-meds.github.io/creating-quarto-websites/)
+-   [Samantha's quarto website tutorial](https://ucsb-meds.github.io/creating-quarto-websites/)
 
-*  [Samantha's quarto blog posts tutorial](https://samanthacsik.github.io/posts/2022-10-24-quarto-blogs/)
+-   [Samantha's quarto blog posts tutorial](https://samanthacsik.github.io/posts/2022-10-24-quarto-blogs/)
 
-* [Mastering Shiny](https://mastering-shiny.org/index.html), by Hadley Wickham 
+-   [Mastering Shiny](https://mastering-shiny.org/index.html), by Hadley Wickham
 
-* [Happy Git and GitHub for the useR](https://happygitwithr.com/), by Jenny Bryan
+-   [Happy Git and GitHub for the useR](https://happygitwithr.com/), by Jenny Bryan
 
-* [R for Data Science](https://r4ds.had.co.nz/), by Hadley Wickham
+-   [R for Data Science](https://r4ds.had.co.nz/), by Hadley Wickham
 
-* [Hitchhiker's Guide to Python](https://docs.python-guide.org/), by Kenneth Reitz & Tanya Schlusser
+-   [Hitchhiker's Guide to Python](https://docs.python-guide.org/), by Kenneth Reitz & Tanya Schlusser
 
-* [Data wrangling essentials: comparisons in JavaScript, Python, SQL, R, and Excel](https://observablehq.com/@observablehq/data-wrangling-translations), by Allison Horst & Paul Buffa
+-   [Data wrangling essentials: comparisons in JavaScript, Python, SQL, R, and Excel](https://observablehq.com/@observablehq/data-wrangling-translations), by Allison Horst & Paul Buffa
 
-* [W3Schools](https://www.w3schools.com/default.asp), particularly for their HTML & CSS tutorials
+-   [W3Schools](https://www.w3schools.com/default.asp), particularly for their HTML & CSS tutorials
 
+-   [Jayde's parameterized reports with quarto](https://github.com/jadeynryan/2023_posit-parameterized-quarto)
 
-* [Jayde's parameterized reports with quarto](https://github.com/jadeynryan/2023_posit-parameterized-quarto)
-
-* [Mine's quarto manuscripts](https://github.com/mine-cetinkaya-rundel/quarto-manuscripts)
+-   [Mine's quarto manuscripts](https://github.com/mine-cetinkaya-rundel/quarto-manuscripts)
