@@ -20,6 +20,12 @@ This was a 'do it yourself too' as I was reading an online version of [Rodrigues
 
 This is an account of my learning journey aided by [this](https://mlflow.org/docs/latest/ml/getting-started/hyperparameter-tuning/) tutorial to grasp the nitty-gritties of buliding, logging, saving and serving machine learning models. The code available at this [repo](https://github.com/Bokola/DeepLearn/tree/main/MLflow) and a write-up is [here](http://bokola.github.io/posts/2025-08-02-End-to-end-ML-with-MLflow/).
 
+# Web scraping: getting data from the internet
+
+I set out to understand how to scrape data using Python. I explored `beautifulsoup`, 
+`requests`, `scrapingBee` API, and `scrapy` to scrape data from  Google news and 
+a product listing page. I wrote a [piece](http://bokola.github.io/posts/2025-08-03-Web-scraping-python/) about it too.
+
 ```{r, include=FALSE}
 1 + 1
 ```

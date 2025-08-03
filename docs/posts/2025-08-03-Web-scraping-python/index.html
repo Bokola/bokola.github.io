@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Basil Okola">
+<meta name="dcterms.date" content="2025-08-03">
+<meta name="description" content="Scraping data from the web using {beautifulsoup4}, {requests}, {ScrapingBee}, and {Scrapy}">
+
+<title>Web Scraping with Python</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-223d728f8d4ae8f037e471e842545cb2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Web Scraping with Python">
+<meta property="og:description" content="Scraping data from the web using {beautifulsoup4}, {requests}, {ScrapingBee}, and {Scrapy}">
+<meta property="og:image" content="https://bokola.github.io/posts/2025-08-03-Web-scraping-python/web-scrap_files/figure-html/cell-2-output-1.png">
+</head>
+
+<body class="fullcontent quarto-light nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">Portfolio</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../resources.html"> 
+<span class="menu-text">resources</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">posts</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page">
+      <h1 class="title">Web Scraping with Python</h1>
+                  <div>
+        <div class="description">
+          Scraping data from the web using <code>{beautifulsoup4}</code>, <code>{requests}</code>, <code>{ScrapingBee}</code>, and <code>{Scrapy}</code>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Quarto</div>
+                <div class="quarto-category">Python</div>
+                <div class="quarto-category">beautifulsoup</div>
+                <div class="quarto-category">scrapy</div>
+                <div class="quarto-category">scrapingBee</div>
+              </div>
+                  </div>
+  </div>
+    
+  <div class="quarto-title-meta-author column-page">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <p class="author"><a href="https://bokola.github.io/">Basil Okola</a> </p>
+    </div>
+    <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              <a href="https://ucsb-meds.github.io/">
+              Master of Statistics and Data Science @ Hasselt University
+              </a>
+            </p>
+        </div>
+    </div>
+
+  <div class="quarto-title-meta column-page">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 3, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block column-page" id="quarto-document-content">
+
+
+
+
+
+
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{okola2025,
+  author = {Okola, Basil},
+  title = {Web {Scraping} with {Python}},
+  date = {2025-08-03},
+  url = {https://bokola.github.io/posts/2025-08-03-Web-scraping-python/},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-okola2025" class="csl-entry quarto-appendix-citeas" role="listitem">
+Okola, Basil. 2025. <span>“Web Scraping with Python.”</span> August 3,
+2025. <a href="https://bokola.github.io/posts/2025-08-03-Web-scraping-python/">https://bokola.github.io/posts/2025-08-03-Web-scraping-python/</a>.
+</div></div></section></div></main> <!-- /main -->
+
+
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Web Scrapping Using Python</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="web-scrap_files/libs/clipboard/clipboard.min.js"></script>
+<script src="web-scrap_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="web-scrap_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="web-scrap_files/libs/quarto-html/popper.min.js"></script>
+<script src="web-scrap_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="web-scrap_files/libs/quarto-html/anchor.min.js"></script>
+<link href="web-scrap_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="web-scrap_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="web-scrap_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="web-scrap_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="web-scrap_files/libs/bootstrap/bootstrap-b9f025fa521194ab51f5de92fbd134be.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+
+
+
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Web Scrapping Using Python</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This is a web scrapping task to find conflict/war related news articles from the internet. There is been quite a lot of that considering the Russia/Ukraine conflict, The South Sudan conflict, and the Palestine/Israel conflict just to mention the most reported cases.</p>
+<section id="using-beautifulsoup-requests" class="level2">
+<h2 class="anchored" data-anchor-id="using-beautifulsoup-requests">Using Beautifulsoup + requests</h2>
+<section id="understanding-websites-structure" class="level3">
+<h3 class="anchored" data-anchor-id="understanding-websites-structure">Understanding website’s structure</h3>
+<p>Prior to scraping inspect the HTML source code of the web page to identify the elements you want to scrape</p>
+</section>
+<section id="set-up-your-develpment-environment" class="level3">
+<h3 class="anchored" data-anchor-id="set-up-your-develpment-environment">Set up your develpment environment</h3>
+<p>Create a virtual environment, follow prompts per your IDE. For VScode I pressed <code>Ctrl+Shift+P</code>then searched <code>Python: Create Environment</code> A beginner web scraper in Python is advised to start with <code>requests</code> and <code>beautifulsoup4</code> librarires which is what we will use. <!-- First we try loggin in to hacker news website. --></p>
+<pre><code>import requests
+from bs4 import BeautifulSoup
+
+baseurl = "https://news.ycombinator.com"
+user = ""
+passd = ""
+
+s = requests.Session()
+data = {"goto": "news", "acct": user, "pw": passd}
+r = s.post(f'{baseurl}', data=data)
+
+soup = BeautifulSoup(r.text, 'html.parser')
+if soup.find(id='logout') is not None:
+    print("Successfully logged in")
+else:
+    print("Authentication error")</code></pre>
+</section>
+<section id="inspect-html-element" class="level3">
+<h3 class="anchored" data-anchor-id="inspect-html-element">Inspect HTML element</h3>
+<p>Each post is wrapped in a <code>&lt;tr&gt;</code> tag with the class <code>athing</code></p>
+<div id="37174a7d" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># import matplotlib</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># matplotlib.use('TkAgg') # Use a non-interactive backend for saving figures</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.image <span class="im">as</span> mpimg</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>image_path <span class="op">=</span> <span class="st">"hacker-element.png"</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> mpimg.imread(image_path)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>plt.imshow(image)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)  <span class="co"># Hide axes</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="web-scrap_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="scrape-with-requests-beautifulsoup4" class="level3">
+<h3 class="anchored" data-anchor-id="scrape-with-requests-beautifulsoup4">Scrape with requests + beautifulsoup4</h3>
+<div id="98498bcc" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bs4 <span class="im">import</span> BeautifulSoup</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> requests.get(<span class="st">"https://news.ycombinator.com/"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>soup <span class="op">=</span> BeautifulSoup(r.text, <span class="st">'html.parser'</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>links <span class="op">=</span> soup.find_all(<span class="st">'tr'</span>, class_<span class="op">=</span><span class="st">'athing'</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>formatted_links <span class="op">=</span> []</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> link <span class="kw">in</span> links:</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> {</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'id'</span>: link[<span class="st">'id'</span>],</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'title'</span>: link.find_all(<span class="st">"td"</span>)[<span class="dv">2</span>].a.text,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'url'</span>: link.find_all(<span class="st">"td"</span>)[<span class="dv">2</span>].a[<span class="st">'href'</span>],</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'rank'</span>: <span class="bu">int</span>(link.find_all(<span class="st">"td"</span>)[<span class="dv">0</span>].span.text.replace(<span class="st">'.'</span>, <span class="st">''</span>))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    formatted_links.append(data)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    formatted_links.append(data)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(formatted_links)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[{'id': '44777760', 'title': 'Persona vectors: Monitoring and controlling character traits in language models', 'url': 'https://www.anthropic.com/research/persona-vectors', 'rank': 1}, {'id': '44777760', 'title': 'Persona vectors: Monitoring and controlling character traits in language models', 'url': 'https://www.anthropic.com/research/persona-vectors', 'rank': 1}, {'id': '44778936', 'title': 'Modern Node.js Patterns', 'url': 'https://kashw1n.com/blog/nodejs-2025/', 'rank': 2}, {'id': '44778936', 'title': 'Modern Node.js Patterns', 'url': 'https://kashw1n.com/blog/nodejs-2025/', 'rank': 2}, {'id': '44777869', 'title': 'UN report finds UN reports are not widely read', 'url': 'https://www.reuters.com/world/un-report-finds-united-nations-reports-are-not-widely-read-2025-08-01/', 'rank': 3}, {'id': '44777869', 'title': 'UN report finds UN reports are not widely read', 'url': 'https://www.reuters.com/world/un-report-finds-united-nations-reports-are-not-widely-read-2025-08-01/', 'rank': 3}, {'id': '44775563', 'title': "If you're remote, ramble", 'url': 'https://stephango.com/ramblings', 'rank': 4}, {'id': '44775563', 'title': "If you're remote, ramble", 'url': 'https://stephango.com/ramblings', 'rank': 4}, {'id': '44778764', 'title': 'ChatGPT chats were indexed then removed from search but still remain online', 'url': 'https://growtika.com/chatgpt-shared-chats-seo-indexing-privacy-leak/', 'rank': 5}, {'id': '44778764', 'title': 'ChatGPT chats were indexed then removed from search but still remain online', 'url': 'https://growtika.com/chatgpt-shared-chats-seo-indexing-privacy-leak/', 'rank': 5}, {'id': '44736025', 'title': 'Helsinki records zero traffic deaths for full year', 'url': 'https://www.helsinkitimes.fi/finland/finland-news/domestic/27539-helsinki-records-zero-traffic-deaths-for-full-year.html', 'rank': 6}, {'id': '44736025', 'title': 'Helsinki records zero traffic deaths for full year', 'url': 'https://www.helsinkitimes.fi/finland/finland-news/domestic/27539-helsinki-records-zero-traffic-deaths-for-full-year.html', 'rank': 6}, {'id': '44774104', 'title': 'Twenty Eighth International Obfuscated C Code Contest', 'url': 'https://www.ioccc.org/2024/index.html', 'rank': 7}, {'id': '44774104', 'title': 'Twenty Eighth International Obfuscated C Code Contest', 'url': 'https://www.ioccc.org/2024/index.html', 'rank': 7}, {'id': '44745441', 'title': "2,500-year-old Siberian 'ice mummy' had intricate tattoos, imaging reveals", 'url': 'https://www.bbc.com/news/articles/c4gzx0zm68vo', 'rank': 8}, {'id': '44745441', 'title': "2,500-year-old Siberian 'ice mummy' had intricate tattoos, imaging reveals", 'url': 'https://www.bbc.com/news/articles/c4gzx0zm68vo', 'rank': 8}, {'id': '44776434', 'title': 'The Fulbright Program: Chock Full of Bright Ideas', 'url': 'https://bastian.rieck.me/blog/2025/fulbright/', 'rank': 9}, {'id': '44776434', 'title': 'The Fulbright Program: Chock Full of Bright Ideas', 'url': 'https://bastian.rieck.me/blog/2025/fulbright/', 'rank': 9}, {'id': '44777965', 'title': 'Converge (YC S23) well-capitalized New York startup seeks product developers', 'url': 'https://www.runconverge.com/careers', 'rank': 10}, {'id': '44777965', 'title': 'Converge (YC S23) well-capitalized New York startup seeks product developers', 'url': 'https://www.runconverge.com/careers', 'rank': 10}, {'id': '44778087', 'title': 'Yosemite embodies the long war over US national park privatization', 'url': 'https://theconversation.com/yosemite-embodies-the-long-war-over-us-national-park-privatization-261133', 'rank': 11}, {'id': '44778087', 'title': 'Yosemite embodies the long war over US national park privatization', 'url': 'https://theconversation.com/yosemite-embodies-the-long-war-over-us-national-park-privatization-261133', 'rank': 11}, {'id': '44738228', 'title': 'The Subway Game (1980)', 'url': 'https://www.gricer.com/subway_game/subway_game.html', 'rank': 12}, {'id': '44738228', 'title': 'The Subway Game (1980)', 'url': 'https://www.gricer.com/subway_game/subway_game.html', 'rank': 12}, {'id': '44775830', 'title': 'How to make almost anything (2019)', 'url': 'https://fab.cba.mit.edu/classes/863.19/CBA/people/dsculley/index.html', 'rank': 13}, {'id': '44775830', 'title': 'How to make almost anything (2019)', 'url': 'https://fab.cba.mit.edu/classes/863.19/CBA/people/dsculley/index.html', 'rank': 13}, {'id': '44774567', 'title': 'A Real PowerBook: The Macintosh Application Environment on a Pa-RISC Laptop', 'url': 'http://oldvcr.blogspot.com/2025/08/a-real-powerbook-macintosh-application.html', 'rank': 14}, {'id': '44774567', 'title': 'A Real PowerBook: The Macintosh Application Environment on a Pa-RISC Laptop', 'url': 'http://oldvcr.blogspot.com/2025/08/a-real-powerbook-macintosh-application.html', 'rank': 14}, {'id': '44775485', 'title': "EHRs: The hidden distraction in your doctor's office", 'url': 'https://spectrum.ieee.org/electronic-health-records', 'rank': 15}, {'id': '44775485', 'title': "EHRs: The hidden distraction in your doctor's office", 'url': 'https://spectrum.ieee.org/electronic-health-records', 'rank': 15}, {'id': '44769039', 'title': 'Telo MT1', 'url': 'https://www.telotrucks.com/', 'rank': 16}, {'id': '44769039', 'title': 'Telo MT1', 'url': 'https://www.telotrucks.com/', 'rank': 16}, {'id': '44746621', 'title': '6 weeks of Claude Code', 'url': 'https://blog.puzzmo.com/posts/2025/07/30/six-weeks-of-claude-code/', 'rank': 17}, {'id': '44746621', 'title': '6 weeks of Claude Code', 'url': 'https://blog.puzzmo.com/posts/2025/07/30/six-weeks-of-claude-code/', 'rank': 17}, {'id': '44748226', 'title': 'Watching the World in a Dark Room: The Early Modern Camera Obscura', 'url': 'https://publicdomainreview.org/essay/the-early-modern-camera-obscura', 'rank': 18}, {'id': '44748226', 'title': 'Watching the World in a Dark Room: The Early Modern Camera Obscura', 'url': 'https://publicdomainreview.org/essay/the-early-modern-camera-obscura', 'rank': 18}, {'id': '44737738', 'title': 'Flourishing chemosynthetic life at the greatest depths of hadal trenches', 'url': 'https://www.nature.com/articles/s41586-025-09317-z', 'rank': 19}, {'id': '44737738', 'title': 'Flourishing chemosynthetic life at the greatest depths of hadal trenches', 'url': 'https://www.nature.com/articles/s41586-025-09317-z', 'rank': 19}, {'id': '44771808', 'title': 'Lina Khan points to Figma IPO as vindication of M&amp;A scrutiny', 'url': 'https://techcrunch.com/2025/08/02/lina-khan-points-to-figma-ipo-as-vindication-for-ma-scrutiny/', 'rank': 20}, {'id': '44771808', 'title': 'Lina Khan points to Figma IPO as vindication of M&amp;A scrutiny', 'url': 'https://techcrunch.com/2025/08/02/lina-khan-points-to-figma-ipo-as-vindication-for-ma-scrutiny/', 'rank': 20}, {'id': '44747000', 'title': 'A 3D model of the human airways via a digital light processing bioprinter', 'url': 'https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/10.1002/bit.29013', 'rank': 21}, {'id': '44747000', 'title': 'A 3D model of the human airways via a digital light processing bioprinter', 'url': 'https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/10.1002/bit.29013', 'rank': 21}, {'id': '44777055', 'title': 'This Old SGI: notes and memoirs on the Silicon Graphics 4D series (1996)', 'url': 'https://archive.irixnet.org/thisoldsgi/', 'rank': 22}, {'id': '44777055', 'title': 'This Old SGI: notes and memoirs on the Silicon Graphics 4D series (1996)', 'url': 'https://archive.irixnet.org/thisoldsgi/', 'rank': 22}, {'id': '44773998', 'title': 'The Algebra Gatekeepers', 'url': 'https://www.educationprogress.org/p/the-algebra-gatekeepers', 'rank': 23}, {'id': '44773998', 'title': 'The Algebra Gatekeepers', 'url': 'https://www.educationprogress.org/p/the-algebra-gatekeepers', 'rank': 23}, {'id': '44747786', 'title': 'My bytecode optimizer beats Copilot by 2x', 'url': 'https://deviantabstraction.com/2025/07/29/how-my-bytecode-optimizer-beats-copilot-by-2x/', 'rank': 24}, {'id': '44747786', 'title': 'My bytecode optimizer beats Copilot by 2x', 'url': 'https://deviantabstraction.com/2025/07/29/how-my-bytecode-optimizer-beats-copilot-by-2x/', 'rank': 24}, {'id': '44739944', 'title': 'Micron rolls out 276-layer SSD trio for speed, scale, and stability', 'url': 'https://blocksandfiles.com/2025/07/30/micron-three-276-layer-ssds/', 'rank': 25}, {'id': '44739944', 'title': 'Micron rolls out 276-layer SSD trio for speed, scale, and stability', 'url': 'https://blocksandfiles.com/2025/07/30/micron-three-276-layer-ssds/', 'rank': 25}, {'id': '44779169', 'title': 'The Dollar Is Dead', 'url': 'https://mathmeetsmoney.substack.com/p/the-dollar-is-dead', 'rank': 26}, {'id': '44779169', 'title': 'The Dollar Is Dead', 'url': 'https://mathmeetsmoney.substack.com/p/the-dollar-is-dead', 'rank': 26}, {'id': '44746583', 'title': 'PixiEditor 2.0 – A FOSS universal 2D graphics editor', 'url': 'https://pixieditor.net/blog/2025/07/30/20-release/', 'rank': 27}, {'id': '44746583', 'title': 'PixiEditor 2.0 – A FOSS universal 2D graphics editor', 'url': 'https://pixieditor.net/blog/2025/07/30/20-release/', 'rank': 27}, {'id': '44766962', 'title': 'At a Loss for Words: A flawed idea is teaching kids to be poor readers (2019)', 'url': 'https://www.apmreports.org/episode/2019/08/22/whats-wrong-how-schools-teach-reading', 'rank': 28}, {'id': '44766962', 'title': 'At a Loss for Words: A flawed idea is teaching kids to be poor readers (2019)', 'url': 'https://www.apmreports.org/episode/2019/08/22/whats-wrong-how-schools-teach-reading', 'rank': 28}, {'id': '44730544', 'title': 'Online Collection of Keygen Music', 'url': 'https://keygenmusic.tk', 'rank': 29}, {'id': '44730544', 'title': 'Online Collection of Keygen Music', 'url': 'https://keygenmusic.tk', 'rank': 29}, {'id': '44736854', 'title': 'Build Your Own Minisforum N5 Inspired Mini NAS: A Comprehensive Guide', 'url': 'https://jackharvest.com/index.php/2025/07/27/build-your-own-minisforum-n5-inspired-mini-nas-a-comprehensive-guide/', 'rank': 30}, {'id': '44736854', 'title': 'Build Your Own Minisforum N5 Inspired Mini NAS: A Comprehensive Guide', 'url': 'https://jackharvest.com/index.php/2025/07/27/build-your-own-minisforum-n5-inspired-mini-nas-a-comprehensive-guide/', 'rank': 30}]</code></pre>
+</div>
+</div>
+</section>
+<section id="store-data-as-.csv" class="level3">
+<h3 class="anchored" data-anchor-id="store-data-as-.csv">Store data as .csv</h3>
+<div id="b144f9d5" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> csv</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">file</span> <span class="op">=</span> <span class="st">'hacker_news_posts.csv'</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="bu">file</span>, <span class="st">'w'</span>, newline<span class="op">=</span><span class="st">""</span>) <span class="im">as</span> f:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    writer <span class="op">=</span> csv.DictWriter(f, fieldnames<span class="op">=</span>[<span class="st">'id'</span>, <span class="st">'title'</span>, <span class="st">'url'</span>, <span class="st">'rank'</span>])</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    writer.writeheader()</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> formatted_links:</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        writer.writerow(row)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="store-data-in-postgresql" class="level3">
+<h3 class="anchored" data-anchor-id="store-data-in-postgresql">Store data in PostgreSQL</h3>
+<section id="step-1-installing-postgresql" class="level4">
+<h4 class="anchored" data-anchor-id="step-1-installing-postgresql">Step 1: Installing PostgreSQL</h4>
+<p>Follow the <a href="https://www.postgresql.org/download/">PostgreSQL download page</a> for downloads and installation</p>
+</section>
+<section id="step-2-creating-a-database-table" class="level4">
+<h4 class="anchored" data-anchor-id="step-2-creating-a-database-table">Step 2: Creating a Database Table</h4>
+<p>First you’ll need a table</p>
+<pre><code>
+#start service
+sudo systemctl start postgresql.service
+
+#log in as a superuser
+sudo -i -u postgres
+
+CREATE DATABASE scrape_demo;
+
+
+CREATE TABLE "hn_links" (
+    "id" INTEGER NOT NULL,
+    "title" VARCHAR NOT NULL,
+    "url" VARCHAR NOT NULL,
+    "rank" INTEGER NOT NULL
+);</code></pre>
+</section>
+<section id="step-3-install-psycopg2-to-connect-to-postgresql" class="level4">
+<h4 class="anchored" data-anchor-id="step-3-install-psycopg2-to-connect-to-postgresql">Step 3: Install Psycopg2 to Connect to PostgreSQL</h4>
+<pre><code>pip install psycopg2</code></pre>
+<p>Establish connection to the database</p>
+<p>Ensure you set password for postgres user, which logs without a password by default</p>
+<pre><code>
+sudo -u postgres psql
+
+postgres=# ALTER USER postgres PASSWORD 'myPassword';
+ALTER ROLE
+</code></pre>
+<div id="ccce3b03" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> psycopg2</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dotenv</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>dotenv.load_dotenv()</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> os.getenv(<span class="st">"pass"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>table_name <span class="op">=</span> <span class="st">"hn_links"</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>csv_path <span class="op">=</span> <span class="st">"hacker_news_posts.csv"</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>con <span class="op">=</span> psycopg2.<span class="ex">connect</span>(host<span class="op">=</span><span class="st">"127.0.0.1"</span>, port<span class="op">=</span><span class="st">"5432"</span>, user<span class="op">=</span><span class="st">"postgres"</span>, password <span class="op">=</span> p,database<span class="op">=</span><span class="st">"scrape_demo"</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Get a database cursor</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>cur <span class="op">=</span> con.cursor()</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> requests.get(<span class="st">'https://news.ycombinator.com'</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>soup <span class="op">=</span> BeautifulSoup(r.text, <span class="st">'html.parser'</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>links <span class="op">=</span> soup.findAll(<span class="st">'tr'</span>, class_<span class="op">=</span><span class="st">'athing'</span>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> link <span class="kw">in</span> links:</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    cur.execute(<span class="st">"""</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="st">        INSERT INTO hn_links (id, title, url, rank)</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="st">        VALUES (</span><span class="sc">%s</span><span class="st">, </span><span class="sc">%s</span><span class="st">, </span><span class="sc">%s</span><span class="st">, </span><span class="sc">%s</span><span class="st">)</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="st">        """</span>,</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>            link[<span class="st">'id'</span>],</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>            link.find_all(<span class="st">'td'</span>)[<span class="dv">2</span>].a.text,</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>            link.find_all(<span class="st">'td'</span>)[<span class="dv">2</span>].a[<span class="st">'href'</span>],</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>            <span class="bu">int</span>(link.find_all(<span class="st">'td'</span>)[<span class="dv">0</span>].span.text.replace(<span class="st">'.'</span>, <span class="st">''</span>))</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Commit the data</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>con.commit()</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Close our database connections</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>cur.close()</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>con.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/tmp/ipykernel_137379/1184676145.py:18: DeprecationWarning: Call to deprecated method findAll. (Replaced by find_all) -- Deprecated since version 4.0.0.
+  links = soup.findAll('tr', class_='athing')</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="using-scapingbee-python-client" class="level2">
+<h2 class="anchored" data-anchor-id="using-scapingbee-python-client">Using ScapingBee Python Client</h2>
+<p>ScrapingBee is a subscription API providing a way to bypass any website’s anti-scraping measures.</p>
+<div id="575bbf49" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scrapingbee <span class="im">import</span> ScrapingBeeClient</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>dotenv.load_dotenv()</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>key <span class="op">=</span> os.getenv(<span class="st">"spring_bee_api_key"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>sb_client <span class="op">=</span> ScrapingBeeClient(api_key<span class="op">=</span>key)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://www.aljazeera.com/"</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> ScrapingBeeClient(api_key<span class="op">=</span>key)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> google_news_headlines_api(country_code<span class="op">=</span><span class="st">'US'</span>):</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    extract_rules <span class="op">=</span> {</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"news"</span>: {</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"selector"</span>: <span class="st">"article"</span>,</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type"</span>: <span class="st">"list"</span>,</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>            <span class="st">"output"</span>: {</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>                <span class="st">"title"</span>: <span class="st">".gPFEn,.JtKRv"</span>,</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>                <span class="st">"source"</span>: <span class="st">".vr1PYe"</span>,</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>                <span class="st">"time"</span>: <span class="st">"time@datetime"</span>,</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>                <span class="st">"author"</span>: <span class="st">".bInasb"</span>,</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>                <span class="st">"link"</span>: <span class="st">".WwrzSb@href"</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>    js_scenario <span class="op">=</span> {</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>        <span class="st">"instructions"</span>:[</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"evaluate"</span>:<span class="st">"document.querySelectorAll('.WwrzSb').forEach( (e) =&gt; e.href = e.href );"</span>}</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span>  client.get(</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f'https://news.google.com/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FtVnVHZ0pWVXlnQVAB?&amp;gl=</span><span class="sc">{</span>country_code<span class="sc">}</span><span class="ss">'</span>,</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>{ </span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>            <span class="st">"custom_google"</span>: <span class="st">"true"</span>,</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>            <span class="st">"wait_for"</span>: <span class="st">".bInasb"</span>,</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>            <span class="st">"extract_rules"</span>: extract_rules,</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>            <span class="st">"js_scenario"</span>: js_scenario, </span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>        retries<span class="op">=</span><span class="dv">2</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> response.text.startswith(<span class="st">'{"message":"Invalid api key:'</span>):</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f"Oops! It seems you may have missed adding your API KEY or you are using an incorrect key.</span><span class="ch">\n</span><span class="ss">Get your free API KEY and 1000 free scraping credits by signing up to our platform here: https://app.scrapingbee.com/account/register"</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> get_info():</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span>(response.json()[<span class="st">'news'</span>]) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="st">"FAILED TO RETRIEVE NEWS"</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="st">"SUCCESS"</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pd.DataFrame({</span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>            <span class="st">'count'</span>: <span class="bu">len</span>(response.json()[<span class="st">'news'</span>]),</span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>            <span class="st">'news_extracts'</span>: response.json()[<span class="st">'news'</span>],</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>            <span class="st">'info'</span>: <span class="ss">f"</span><span class="sc">{</span>response<span class="sc">.</span>status_code<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>get_info()<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a><span class="co">#country_code: Set the news location; US, IN, etc.</span></span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> google_news_headlines_api(country_code<span class="op">=</span><span class="st">'US'</span>)</span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.iloc[:<span class="dv">10</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   count                                      news_extracts         info
+0    262  {'title': 'Trump Live Updates: White House Def...  200 SUCCESS
+1    262  {'title': 'White House officials rush to defen...  200 SUCCESS
+2    262  {'title': 'Larry Summers says Trump's accusati...  200 SUCCESS
+3    262  {'title': 'Erika McEntarfer, The Economist Tru...  200 SUCCESS
+4    262  {'title': 'Eric Holder backs Democratic respon...  200 SUCCESS
+5    262  {'title': 'Will Texas be as 'gerrymandered' as...  200 SUCCESS
+6    262  {'title': 'Texas House panel passes new redist...  200 SUCCESS
+7    262  {'title': 'Eric Holder on Why He Reversed Cour...  200 SUCCESS
+8    262  {'title': 'Earthquake in Bergen County shakes ...  200 SUCCESS
+9    262  {'title': 'Earthquake Jolts New Jersey and New...  200 SUCCESS</code></pre>
+</div>
+</div>
+</section>
+<section id="web-scraping-with-scrapy" class="level2">
+<h2 class="anchored" data-anchor-id="web-scraping-with-scrapy"><a href="https://scrapfly.io/blog/posts/web-scraping-with-scrapy">Web scraping with Scrapy</a></h2>
+<p>Scrapy is a web scraping framework using an event-driven networking infrastracture built around an asynchronous network engine that allows for more efficiency and scalability. It is made of a <strong>crawler</strong> that handles low-level logic, and a <strong>spider</strong> that is provider by the user to help the crawler generate request, parse and retrieve data.</p>
+<p>In this section we use scrapy to scrape product listings available at <a href="https://web-scraping.dev/products">web-scraping.dev</a>, but first some house-keeping.</p>
+<p>To install scrapy run <code>pip install scrapy</code> or better still add <code>scrapy</code> to your project’s <code>requirements.txt</code> and run <code>pip install -r requirements.txt</code>. Start a scrapy project by running <code>scrapy startproject &lt;project-name&gt; &lt;project-directory&gt;</code> in terminal. Some scrapy commands below:</p>
+<div id="025dc01e" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>scrapy <span class="op">--</span><span class="bu">help</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Scrapy 2.13.3 - active project: webscrapingdev
+
+Usage:
+  scrapy &lt;command&gt; [options] [args]
+
+Available commands:
+  bench         Run quick benchmark test
+  check         Check spider contracts
+  crawl         Run a spider
+  edit          Edit spider
+  fetch         Fetch a URL using the Scrapy downloader
+  genspider     Generate new spider using pre-defined templates
+  list          List available spiders
+  parse         Parse URL (using its spider) and print the results
+  runspider     Run a self-contained spider (without creating a project)
+  settings      Get settings values
+  shell         Interactive scraping console
+  startproject  Create new project
+  version       Print Scrapy version
+  view          Open URL in browser, as seen by Scrapy
+
+Use "scrapy &lt;command&gt; -h" to see more info about a command</code></pre>
+</div>
+</div>
+<section id="creating-a-spider" class="level3">
+<h3 class="anchored" data-anchor-id="creating-a-spider">Creating a spider</h3>
+<p>run <code>scrapy genspider &lt;name&gt; &lt;host-to-scrape&gt;</code></p>
+<div id="0e56b1ec" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>scrapy genspider products web<span class="op">-</span>scraping.dev</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spider 'products' already exists in module:
+  webscrapingdev.spiders.products</code></pre>
+</div>
+</div>
+<div id="607eba57" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>scrapy <span class="bu">list</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>tree</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre>products
+
+<span class="ansi-blue-fg ansi-bold">.</span>
+
+├── <span class="ansi-magenta-fg ansi-bold">article-class.png</span>
+
+├── <span class="ansi-magenta-fg ansi-bold">hacker-element.png</span>
+
+├── hacker_news_posts.csv
+
+├── LICENSE
+
+├── producthunt.json
+
+├── README.md
+
+├── requirements.txt
+
+├── results.json
+
+├── scrapy.cfg
+
+├── <span class="ansi-blue-fg ansi-bold">webscrapingdev</span>
+
+│&nbsp;&nbsp; ├── __init__.py
+
+│&nbsp;&nbsp; ├── items.py
+
+│&nbsp;&nbsp; ├── middlewares.py
+
+│&nbsp;&nbsp; ├── pipelines.py
+
+│&nbsp;&nbsp; ├── <span class="ansi-blue-fg ansi-bold">__pycache__</span>
+
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── __init__.cpython-312.pyc
+
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── settings.cpython-312.pyc
+
+│&nbsp;&nbsp; ├── settings.py
+
+│&nbsp;&nbsp; └── <span class="ansi-blue-fg ansi-bold">spiders</span>
+
+│&nbsp;&nbsp;     ├── __init__.py
+
+│&nbsp;&nbsp;     ├── products.py
+
+│&nbsp;&nbsp;     └── <span class="ansi-blue-fg ansi-bold">__pycache__</span>
+
+│&nbsp;&nbsp;         ├── __init__.cpython-312.pyc
+
+│&nbsp;&nbsp;         └── products.cpython-312.pyc
+
+├── web-scrap.ipynb
+
+├── web-scrap.py
+
+├── web-scrap.qmd
+
+└── web-scrap.quarto_ipynb
+
+
+
+5 directories, 24 files
+</pre>
+</div>
+</div>
+</div>
+<p>if you open the generated spider - <code>products.py</code>, you’ll find the following</p>
+<pre><code>import scrapy
+
+
+class ProductsSpider(scrapy.Spider):
+    name = "products"
+    allowed_domains = ["web-scraping.dev"]
+    start_urls = ["https://web-scraping.dev"]
+
+    def parse(self, response):
+        pass
+</code></pre>
+<ul>
+<li><p><code>name</code> is used as a reference to the spider for <code>scrapy</code> commands like <code>crawl</code><name>` - this would run the scraper</name></p></li>
+<li><p><code>allowed_domains</code> is a safety feauture restricting this spider to crawl only particular domains.</p></li>
+<li><p><code>start_urls</code> indicates the spider starting point while <code>parse()</code> is the first callback to execute above instructions.</p></li>
+</ul>
+</section>
+<section id="adding-crawling-logic" class="level3">
+<h3 class="anchored" data-anchor-id="adding-crawling-logic">Adding crawling logic</h3>
+<p>We want our <code>start_urls</code> to be some topic directories e.g., <a href="https://www.producthunt.com/topics/developer-tools">https://www.producthunt.com/topics/developer-tools</a> and our <code>parse()</code> callback method to find all product links and schedule them to be scrapped:</p>
+<pre><code># /spiders/products.py
+import scrapy
+from scrapy.http import Response, Request
+
+
+class ProductsSpider(scrapy.Spider):
+    name = 'products'
+    allowed_domains = ['web-scraping.dev']
+    start_urls = [
+        'https://web-scraping.dev/products',
+    ]
+
+    def parse(self, response: Response):
+        product_urls = response.xpath(
+            "//div[@class='row product']/div/h3/a/@href"
+        ).getall()
+        for url in product_urls:
+            yield Request(url, callback=self.parse_product)
+        # or shortcut in scrapy &gt;2.0
+        # yield from response.follow_all(product_urls, callback=self.parse_product)
+    
+    def parse_product(self, response: Response):
+        print(response)
+</code></pre>
+</section>
+<section id="adding-parsing-logic" class="level3">
+<h3 class="anchored" data-anchor-id="adding-parsing-logic">Adding Parsing Logic</h3>
+<p>Populate <code>parse_product()</code></p>
+<pre><code># /spiders/products.py
+...
+
+    def parse_product(self, response: Response):
+        yield {
+            "title": response.xpath("//h3[contains(@class, 'product-title')]/text()").get(),
+            "price": response.xpath("//span[contains(@class, 'product-price')]/text()").get(),
+            "image": response.xpath("//div[contains(@class, 'product-image')]/img/@src").get(),
+            "description": response.xpath("//p[contains(@class, 'description')]/text()").get()
+        }
+</code></pre>
+</section>
+<section id="basic-settings" class="level3">
+<h3 class="anchored" data-anchor-id="basic-settings">Basic Settings</h3>
+<p>Adjust recommended settings:</p>
+<pre><code># settings.py
+# will ignore /robots.txt rules that might prevent scraping
+ROBOTSTXT_OBEY = False
+# will cache all request to /httpcache directory which makes running spiders in development much quicker
+# tip: to refresh cache just delete /httpcache directory
+HTTPCACHE_ENABLED = True
+# while developing we want to see debug logs
+LOG_LEVEL = "DEBUG" # or "INFO" in production
+
+# to avoid basic bot detection we want to set some basic headers
+DEFAULT_REQUEST_HEADERS = {
+    # we should use headers
+    'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'en',
+}
+</code></pre>
+</section>
+<section id="running-spiders" class="level3">
+<h3 class="anchored" data-anchor-id="running-spiders">Running Spiders</h3>
+<p>Either through the <code>scrapy</code> command or explicitly calling scrapy using a Python script.</p>
+<div id="cd429ecf" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>scrapy crawl products</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2025-08-03 23:05:30 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: webscrapingdev)
+2025-08-03 23:05:30 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.0',
+ 'libxml2': '2.14.4',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.12.3 (main, Jun 18 2025, 17:59:45) [GCC 13.3.0]',
+ 'pyOpenSSL': '25.1.0 (OpenSSL 3.5.1 1 Jul 2025)',
+ 'cryptography': '45.0.5',
+ 'Platform': 'Linux-6.14.0-27-generic-x86_64-with-glibc2.39'}
+2025-08-03 23:05:30 [scrapy.addons] INFO: Enabled addons:
+[]
+2025-08-03 23:05:30 [asyncio] DEBUG: Using selector: EpollSelector
+2025-08-03 23:05:30 [scrapy.utils.log] DEBUG: Using reactor: twisted.internet.asyncioreactor.AsyncioSelectorReactor
+2025-08-03 23:05:30 [scrapy.utils.log] DEBUG: Using asyncio event loop: asyncio.unix_events._UnixSelectorEventLoop
+2025-08-03 23:05:30 [scrapy.extensions.telnet] INFO: Telnet Password: 54a208c5e6d0eeb0
+2025-08-03 23:05:30 [scrapy.middleware] INFO: Enabled extensions:
+['scrapy.extensions.corestats.CoreStats',
+ 'scrapy.extensions.telnet.TelnetConsole',
+ 'scrapy.extensions.memusage.MemoryUsage',
+ 'scrapy.extensions.feedexport.FeedExporter',
+ 'scrapy.extensions.logstats.LogStats']
+2025-08-03 23:05:30 [scrapy.crawler] INFO: Overridden settings:
+{'BOT_NAME': 'webscrapingdev',
+ 'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
+ 'DOWNLOAD_DELAY': 1,
+ 'FEED_EXPORT_ENCODING': 'utf-8',
+ 'HTTPCACHE_ENABLED': True,
+ 'NEWSPIDER_MODULE': 'webscrapingdev.spiders',
+ 'SPIDER_MODULES': ['webscrapingdev.spiders']}
+2025-08-03 23:05:30 [scrapy.middleware] INFO: Enabled downloader middlewares:
+['scrapy.downloadermiddlewares.offsite.OffsiteMiddleware',
+ 'scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware',
+ 'scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware',
+ 'scrapy.downloadermiddlewares.defaultheaders.DefaultHeadersMiddleware',
+ 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware',
+ 'scrapy.downloadermiddlewares.retry.RetryMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.MetaRefreshMiddleware',
+ 'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.RedirectMiddleware',
+ 'scrapy.downloadermiddlewares.cookies.CookiesMiddleware',
+ 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware',
+ 'scrapy.downloadermiddlewares.stats.DownloaderStats',
+ 'scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware']
+2025-08-03 23:05:30 [scrapy.middleware] INFO: Enabled spider middlewares:
+['scrapy.spidermiddlewares.start.StartSpiderMiddleware',
+ 'scrapy.spidermiddlewares.httperror.HttpErrorMiddleware',
+ 'scrapy.spidermiddlewares.referer.RefererMiddleware',
+ 'scrapy.spidermiddlewares.urllength.UrlLengthMiddleware',
+ 'scrapy.spidermiddlewares.depth.DepthMiddleware']
+2025-08-03 23:05:30 [scrapy.middleware] INFO: Enabled item pipelines:
+[]
+2025-08-03 23:05:30 [scrapy.core.engine] INFO: Spider opened
+2025-08-03 23:05:30 [scrapy.extensions.logstats] INFO: Crawled 0 pages (at 0 pages/min), scraped 0 items (at 0 items/min)
+2025-08-03 23:05:30 [scrapy.extensions.httpcache] DEBUG: Using filesystem cache storage in /home/basil-owiti/web-scrap/.scrapy/httpcache
+2025-08-03 23:05:30 [scrapy.extensions.telnet] INFO: Telnet console listening on 127.0.0.1:6023
+2025-08-03 23:05:30 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/products&gt; (referer: None) ['cached']
+2025-08-03 23:05:30 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/product/5&gt; (referer: https://web-scraping.dev/products) ['cached']
+2025-08-03 23:05:30 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/product/4&gt; (referer: https://web-scraping.dev/products) ['cached']
+2025-08-03 23:05:30 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/product/3&gt; (referer: https://web-scraping.dev/products) ['cached']
+2025-08-03 23:05:30 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/product/2&gt; (referer: https://web-scraping.dev/products) ['cached']
+2025-08-03 23:05:30 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/product/1&gt; (referer: https://web-scraping.dev/products) ['cached']
+2025-08-03 23:05:30 [scrapy.core.scraper] DEBUG: Scraped from &lt;200 https://web-scraping.dev/product/5&gt;
+{'title': 'Blue Energy Potion', 'price': '$4.99', 'image': 'https://web-scraping.dev/assets/products/blue-potion.webp', 'description': "Ignite your gaming sessions with our 'Blue Energy Potion', a premium energy drink crafted for dedicated gamers. Inspired by the classic video game potions, this energy drink provides a much-needed boost to keep you focused and energized. It's more than just an energy drink - it's an ode to the gaming culture, packaged in an aesthetically pleasing potion-like bottle that'll make you feel like you're in your favorite game world. Drink up and game on!"}
+2025-08-03 23:05:30 [scrapy.core.scraper] DEBUG: Scraped from &lt;200 https://web-scraping.dev/product/4&gt;
+{'title': 'Red Energy Potion', 'price': '$4.99', 'image': 'https://web-scraping.dev/assets/products/red-potion.webp', 'description': "Elevate your game with our 'Red Potion', an extraordinary energy drink that's as enticing as it is effective. This fiery red potion delivers an explosive berry flavor and an energy kick that keeps you at the top of your game. Are you ready to level up?"}
+2025-08-03 23:05:30 [scrapy.core.scraper] DEBUG: Scraped from &lt;200 https://web-scraping.dev/product/3&gt;
+{'title': 'Teal Energy Potion', 'price': '$4.99', 'image': 'https://web-scraping.dev/assets/products/teal-potion.webp', 'description': "Experience a surge of vitality with our 'Teal Potion', an exceptional energy drink designed for the gaming community. With its intriguing teal color and a flavor that keeps you asking for more, this potion is your best companion during those long gaming nights. Every sip is an adventure - let the quest begin!"}
+2025-08-03 23:05:30 [scrapy.core.scraper] DEBUG: Scraped from &lt;200 https://web-scraping.dev/product/2&gt;
+{'title': 'Dark Red Energy Potion', 'price': '$4.99', 'image': 'https://web-scraping.dev/assets/products/darkred-potion.webp', 'description': "Unleash the power within with our 'Dark Red Potion', an energy drink as intense as the games you play. Its deep red color and bold cherry cola flavor are as inviting as they are invigorating. Bring out the best in your gaming performance, and unlock your full potential."}
+2025-08-03 23:05:30 [scrapy.core.scraper] DEBUG: Scraped from &lt;200 https://web-scraping.dev/product/1&gt;
+{'title': 'Box of Chocolate Candy', 'price': '$9.99 ', 'image': 'https://web-scraping.dev/assets/products/orange-chocolate-box-small-1.webp', 'description': "Indulge your sweet tooth with our Box of Chocolate Candy. Each box contains an assortment of rich, flavorful chocolates with a smooth, creamy filling. Choose from a variety of flavors including zesty orange and sweet cherry. Whether you're looking for the perfect gift or just want to treat yourself, our Box of Chocolate Candy is sure to satisfy."}
+2025-08-03 23:05:30 [scrapy.core.engine] INFO: Closing spider (finished)
+2025-08-03 23:05:30 [scrapy.extensions.feedexport] INFO: Stored json feed (5 items) in: producthunt.json
+2025-08-03 23:05:30 [scrapy.statscollectors] INFO: Dumping Scrapy stats:
+{'downloader/request_bytes': 2187,
+ 'downloader/request_count': 6,
+ 'downloader/request_method_count/GET': 6,
+ 'downloader/response_bytes': 129325,
+ 'downloader/response_count': 6,
+ 'downloader/response_status_count/200': 6,
+ 'elapsed_time_seconds': 0.273339,
+ 'feedexport/success_count/FileFeedStorage': 1,
+ 'finish_reason': 'finished',
+ 'finish_time': datetime.datetime(2025, 8, 3, 20, 5, 30, 975962, tzinfo=datetime.timezone.utc),
+ 'httpcache/hit': 6,
+ 'item_scraped_count': 5,
+ 'items_per_minute': None,
+ 'log_count/DEBUG': 15,
+ 'log_count/INFO': 11,
+ 'memusage/max': 169533440,
+ 'memusage/startup': 169533440,
+ 'request_depth_max': 1,
+ 'response_received_count': 6,
+ 'responses_per_minute': None,
+ 'scheduler/dequeued': 6,
+ 'scheduler/dequeued/memory': 6,
+ 'scheduler/enqueued': 6,
+ 'scheduler/enqueued/memory': 6,
+ 'start_time': datetime.datetime(2025, 8, 3, 20, 5, 30, 702623, tzinfo=datetime.timezone.utc)}
+2025-08-03 23:05:30 [scrapy.core.engine] INFO: Spider closed (finished)</code></pre>
+</div>
+</div>
+</section>
+<section id="saving-results" class="level3">
+<h3 class="anchored" data-anchor-id="saving-results">Saving results</h3>
+<div id="0a6348d7" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>scrapy crawl products <span class="op">--</span>output results.json</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2025-08-03 23:05:31 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: webscrapingdev)
+2025-08-03 23:05:31 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.0',
+ 'libxml2': '2.14.4',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.12.3 (main, Jun 18 2025, 17:59:45) [GCC 13.3.0]',
+ 'pyOpenSSL': '25.1.0 (OpenSSL 3.5.1 1 Jul 2025)',
+ 'cryptography': '45.0.5',
+ 'Platform': 'Linux-6.14.0-27-generic-x86_64-with-glibc2.39'}
+2025-08-03 23:05:31 [scrapy.addons] INFO: Enabled addons:
+[]
+2025-08-03 23:05:31 [asyncio] DEBUG: Using selector: EpollSelector
+2025-08-03 23:05:31 [scrapy.utils.log] DEBUG: Using reactor: twisted.internet.asyncioreactor.AsyncioSelectorReactor
+2025-08-03 23:05:31 [scrapy.utils.log] DEBUG: Using asyncio event loop: asyncio.unix_events._UnixSelectorEventLoop
+2025-08-03 23:05:31 [scrapy.extensions.telnet] INFO: Telnet Password: 3b6189cc1a000885
+2025-08-03 23:05:31 [scrapy.middleware] INFO: Enabled extensions:
+['scrapy.extensions.corestats.CoreStats',
+ 'scrapy.extensions.telnet.TelnetConsole',
+ 'scrapy.extensions.memusage.MemoryUsage',
+ 'scrapy.extensions.feedexport.FeedExporter',
+ 'scrapy.extensions.logstats.LogStats']
+2025-08-03 23:05:31 [scrapy.crawler] INFO: Overridden settings:
+{'BOT_NAME': 'webscrapingdev',
+ 'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
+ 'DOWNLOAD_DELAY': 1,
+ 'FEED_EXPORT_ENCODING': 'utf-8',
+ 'HTTPCACHE_ENABLED': True,
+ 'NEWSPIDER_MODULE': 'webscrapingdev.spiders',
+ 'SPIDER_MODULES': ['webscrapingdev.spiders']}
+2025-08-03 23:05:31 [scrapy.middleware] INFO: Enabled downloader middlewares:
+['scrapy.downloadermiddlewares.offsite.OffsiteMiddleware',
+ 'scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware',
+ 'scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware',
+ 'scrapy.downloadermiddlewares.defaultheaders.DefaultHeadersMiddleware',
+ 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware',
+ 'scrapy.downloadermiddlewares.retry.RetryMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.MetaRefreshMiddleware',
+ 'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.RedirectMiddleware',
+ 'scrapy.downloadermiddlewares.cookies.CookiesMiddleware',
+ 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware',
+ 'scrapy.downloadermiddlewares.stats.DownloaderStats',
+ 'scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware']
+2025-08-03 23:05:31 [scrapy.middleware] INFO: Enabled spider middlewares:
+['scrapy.spidermiddlewares.start.StartSpiderMiddleware',
+ 'scrapy.spidermiddlewares.httperror.HttpErrorMiddleware',
+ 'scrapy.spidermiddlewares.referer.RefererMiddleware',
+ 'scrapy.spidermiddlewares.urllength.UrlLengthMiddleware',
+ 'scrapy.spidermiddlewares.depth.DepthMiddleware']
+2025-08-03 23:05:31 [scrapy.middleware] INFO: Enabled item pipelines:
+[]
+2025-08-03 23:05:31 [scrapy.core.engine] INFO: Spider opened
+2025-08-03 23:05:31 [scrapy.extensions.logstats] INFO: Crawled 0 pages (at 0 pages/min), scraped 0 items (at 0 items/min)
+2025-08-03 23:05:31 [scrapy.extensions.httpcache] DEBUG: Using filesystem cache storage in /home/basil-owiti/web-scrap/.scrapy/httpcache
+2025-08-03 23:05:31 [scrapy.extensions.telnet] INFO: Telnet console listening on 127.0.0.1:6023
+2025-08-03 23:05:31 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/products&gt; (referer: None) ['cached']
+2025-08-03 23:05:31 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/product/5&gt; (referer: https://web-scraping.dev/products) ['cached']
+2025-08-03 23:05:31 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/product/4&gt; (referer: https://web-scraping.dev/products) ['cached']
+2025-08-03 23:05:31 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/product/3&gt; (referer: https://web-scraping.dev/products) ['cached']
+2025-08-03 23:05:31 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/product/2&gt; (referer: https://web-scraping.dev/products) ['cached']
+2025-08-03 23:05:31 [scrapy.core.engine] DEBUG: Crawled (200) &lt;GET https://web-scraping.dev/product/1&gt; (referer: https://web-scraping.dev/products) ['cached']
+2025-08-03 23:05:31 [scrapy.core.scraper] DEBUG: Scraped from &lt;200 https://web-scraping.dev/product/5&gt;
+{'title': 'Blue Energy Potion', 'price': '$4.99', 'image': 'https://web-scraping.dev/assets/products/blue-potion.webp', 'description': "Ignite your gaming sessions with our 'Blue Energy Potion', a premium energy drink crafted for dedicated gamers. Inspired by the classic video game potions, this energy drink provides a much-needed boost to keep you focused and energized. It's more than just an energy drink - it's an ode to the gaming culture, packaged in an aesthetically pleasing potion-like bottle that'll make you feel like you're in your favorite game world. Drink up and game on!"}
+2025-08-03 23:05:31 [scrapy.core.scraper] DEBUG: Scraped from &lt;200 https://web-scraping.dev/product/4&gt;
+{'title': 'Red Energy Potion', 'price': '$4.99', 'image': 'https://web-scraping.dev/assets/products/red-potion.webp', 'description': "Elevate your game with our 'Red Potion', an extraordinary energy drink that's as enticing as it is effective. This fiery red potion delivers an explosive berry flavor and an energy kick that keeps you at the top of your game. Are you ready to level up?"}
+2025-08-03 23:05:31 [scrapy.core.scraper] DEBUG: Scraped from &lt;200 https://web-scraping.dev/product/3&gt;
+{'title': 'Teal Energy Potion', 'price': '$4.99', 'image': 'https://web-scraping.dev/assets/products/teal-potion.webp', 'description': "Experience a surge of vitality with our 'Teal Potion', an exceptional energy drink designed for the gaming community. With its intriguing teal color and a flavor that keeps you asking for more, this potion is your best companion during those long gaming nights. Every sip is an adventure - let the quest begin!"}
+2025-08-03 23:05:31 [scrapy.core.scraper] DEBUG: Scraped from &lt;200 https://web-scraping.dev/product/2&gt;
+{'title': 'Dark Red Energy Potion', 'price': '$4.99', 'image': 'https://web-scraping.dev/assets/products/darkred-potion.webp', 'description': "Unleash the power within with our 'Dark Red Potion', an energy drink as intense as the games you play. Its deep red color and bold cherry cola flavor are as inviting as they are invigorating. Bring out the best in your gaming performance, and unlock your full potential."}
+2025-08-03 23:05:31 [scrapy.core.scraper] DEBUG: Scraped from &lt;200 https://web-scraping.dev/product/1&gt;
+{'title': 'Box of Chocolate Candy', 'price': '$9.99 ', 'image': 'https://web-scraping.dev/assets/products/orange-chocolate-box-small-1.webp', 'description': "Indulge your sweet tooth with our Box of Chocolate Candy. Each box contains an assortment of rich, flavorful chocolates with a smooth, creamy filling. Choose from a variety of flavors including zesty orange and sweet cherry. Whether you're looking for the perfect gift or just want to treat yourself, our Box of Chocolate Candy is sure to satisfy."}
+2025-08-03 23:05:31 [scrapy.core.engine] INFO: Closing spider (finished)
+2025-08-03 23:05:31 [scrapy.extensions.feedexport] INFO: Stored json feed (5 items) in: results.json
+2025-08-03 23:05:31 [scrapy.extensions.feedexport] INFO: Stored json feed (5 items) in: producthunt.json
+2025-08-03 23:05:31 [scrapy.statscollectors] INFO: Dumping Scrapy stats:
+{'downloader/request_bytes': 2187,
+ 'downloader/request_count': 6,
+ 'downloader/request_method_count/GET': 6,
+ 'downloader/response_bytes': 129325,
+ 'downloader/response_count': 6,
+ 'downloader/response_status_count/200': 6,
+ 'elapsed_time_seconds': 0.270542,
+ 'feedexport/success_count/FileFeedStorage': 2,
+ 'finish_reason': 'finished',
+ 'finish_time': datetime.datetime(2025, 8, 3, 20, 5, 31, 888646, tzinfo=datetime.timezone.utc),
+ 'httpcache/hit': 6,
+ 'item_scraped_count': 5,
+ 'items_per_minute': None,
+ 'log_count/DEBUG': 15,
+ 'log_count/INFO': 12,
+ 'memusage/max': 169545728,
+ 'memusage/startup': 169545728,
+ 'request_depth_max': 1,
+ 'response_received_count': 6,
+ 'responses_per_minute': None,
+ 'scheduler/dequeued': 6,
+ 'scheduler/dequeued/memory': 6,
+ 'scheduler/enqueued': 6,
+ 'scheduler/enqueued/memory': 6,
+ 'start_time': datetime.datetime(2025, 8, 3, 20, 5, 31, 618104, tzinfo=datetime.timezone.utc)}
+2025-08-03 23:05:31 [scrapy.core.engine] INFO: Spider closed (finished)</code></pre>
+</div>
+</div>
+<div id="15450c2f" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>tree</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-blue-fg ansi-bold">.</span>
+
+├── <span class="ansi-magenta-fg ansi-bold">article-class.png</span>
+
+├── <span class="ansi-magenta-fg ansi-bold">hacker-element.png</span>
+
+├── hacker_news_posts.csv
+
+├── LICENSE
+
+├── producthunt.json
+
+├── README.md
+
+├── requirements.txt
+
+├── results.json
+
+├── scrapy.cfg
+
+├── <span class="ansi-blue-fg ansi-bold">webscrapingdev</span>
+
+│&nbsp;&nbsp; ├── __init__.py
+
+│&nbsp;&nbsp; ├── items.py
+
+│&nbsp;&nbsp; ├── middlewares.py
+
+│&nbsp;&nbsp; ├── pipelines.py
+
+│&nbsp;&nbsp; ├── <span class="ansi-blue-fg ansi-bold">__pycache__</span>
+
+│&nbsp;&nbsp; │&nbsp;&nbsp; ├── __init__.cpython-312.pyc
+
+│&nbsp;&nbsp; │&nbsp;&nbsp; └── settings.cpython-312.pyc
+
+│&nbsp;&nbsp; ├── settings.py
+
+│&nbsp;&nbsp; └── <span class="ansi-blue-fg ansi-bold">spiders</span>
+
+│&nbsp;&nbsp;     ├── __init__.py
+
+│&nbsp;&nbsp;     ├── products.py
+
+│&nbsp;&nbsp;     └── <span class="ansi-blue-fg ansi-bold">__pycache__</span>
+
+│&nbsp;&nbsp;         ├── __init__.cpython-312.pyc
+
+│&nbsp;&nbsp;         └── products.cpython-312.pyc
+
+├── web-scrap.ipynb
+
+├── web-scrap.py
+
+├── web-scrap.qmd
+
+└── web-scrap.quarto_ipynb
+
+
+
+5 directories, 24 files
+</pre>
+</div>
+</div>
+</div>
+<div id="e00f00a0" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>json_file <span class="op">=</span> <span class="st">'results.json'</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(json_file) <span class="im">as</span> f:</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    j_obj <span class="op">=</span> json.load(f)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>json_fmt <span class="op">=</span> json.dumps(j_obj, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(json_fmt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[
+  {
+    "title": "Blue Energy Potion",
+    "price": "$4.99",
+    "image": "https://web-scraping.dev/assets/products/blue-potion.webp",
+    "description": "Ignite your gaming sessions with our 'Blue Energy Potion', a premium energy drink crafted for dedicated gamers. Inspired by the classic video game potions, this energy drink provides a much-needed boost to keep you focused and energized. It's more than just an energy drink - it's an ode to the gaming culture, packaged in an aesthetically pleasing potion-like bottle that'll make you feel like you're in your favorite game world. Drink up and game on!"
+  },
+  {
+    "title": "Red Energy Potion",
+    "price": "$4.99",
+    "image": "https://web-scraping.dev/assets/products/red-potion.webp",
+    "description": "Elevate your game with our 'Red Potion', an extraordinary energy drink that's as enticing as it is effective. This fiery red potion delivers an explosive berry flavor and an energy kick that keeps you at the top of your game. Are you ready to level up?"
+  },
+  {
+    "title": "Teal Energy Potion",
+    "price": "$4.99",
+    "image": "https://web-scraping.dev/assets/products/teal-potion.webp",
+    "description": "Experience a surge of vitality with our 'Teal Potion', an exceptional energy drink designed for the gaming community. With its intriguing teal color and a flavor that keeps you asking for more, this potion is your best companion during those long gaming nights. Every sip is an adventure - let the quest begin!"
+  },
+  {
+    "title": "Dark Red Energy Potion",
+    "price": "$4.99",
+    "image": "https://web-scraping.dev/assets/products/darkred-potion.webp",
+    "description": "Unleash the power within with our 'Dark Red Potion', an energy drink as intense as the games you play. Its deep red color and bold cherry cola flavor are as inviting as they are invigorating. Bring out the best in your gaming performance, and unlock your full potential."
+  },
+  {
+    "title": "Box of Chocolate Candy",
+    "price": "$9.99 ",
+    "image": "https://web-scraping.dev/assets/products/orange-chocolate-box-small-1.webp",
+    "description": "Indulge your sweet tooth with our Box of Chocolate Candy. Each box contains an assortment of rich, flavorful chocolates with a smooth, creamy filling. Choose from a variety of flavors including zesty orange and sweet cherry. Whether you're looking for the perfect gift or just want to treat yourself, our Box of Chocolate Candy is sure to satisfy."
+  }
+]</code></pre>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/bokola\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
