@@ -1,6 +1,6 @@
 ---
 title: "End-to-end Machine Learning (MLflow + Docker + Google Cloud)"
-description: "Writing R packages using devtools, roxygen2 and usethis packages"
+description: "Machine learning Workflow using MLflow locally and pushing image to google cloud"
 author:
   - name: Basil Okola
     url: https://bokola.github.io/
@@ -12,7 +12,6 @@ categories: [Quarto, Python, MLflow] # self-defined categories
 include-after-body: MLOPs-mlflow-docker-gc-1.html
 citation: 
   url: https://bokola.github.io/posts/2025-08-02-End-to-end-ML-with-MLflow/ 
-# image: preview-image.png
+
 draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
 ---
-

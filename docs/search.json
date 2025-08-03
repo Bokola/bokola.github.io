@@ -18,14 +18,14 @@
     "href": "index.html",
     "title": "",
     "section": "",
-    "text": "Hello!\nWelcome to my personal (work in progress) site. I am a student enrolled in a Master of Science degree in Statistics and data science, specializing in biostatistics. I use R, SAS, and Python for statistical analysis and visualizations. My interest is statistical computing applied to spatial statistics, infectious diseases modelling and Bayesian data analysis.\n\neducation\n\n\nMS in Biostatistics, 2020 - Ongoing|Hasselt University\n\n\n\nBS in Applied Statistics, 2015|Maseno University\n\n\n\n\n\nexperience\n\n\nBiometrician, 2024-present|International Potato Center (CIP)\n\n\nResearch Assistant, 2022-2023|Karolinska Institutet\n\n\n\nData Manager, 2022-2022|Kenya Medical Research Institute\n\n\n\nData Manager, 2018-2020|KEMRI - Wellcome Trust Research Programme"
+    "text": "Hello!\nYou’ve made it to my landing page! I am a student enrolled in a Master of Science degree in Statistics and data science, specializing in biostatistics. I use R, SAS, and Python for statistical analysis and visualizations. My interest is statistical computing applied to spatial statistics, infectious diseases modelling and Bayesian data analysis.\n\neducation\n\n\nMS in Biostatistics, 2020 - Ongoing|Hasselt University\n\n\n\nBS in Applied Statistics, 2015|Maseno University\n\n\n\n\n\nexperience\n\n\nBiometrician, 2024-present|International Potato Center (CIP)\n\n\nResearch Assistant, 2022-2023|Karolinska Institutet\n\n\n\nData Manager, 2022-2022|Kenya Medical Research Institute\n\n\n\nData Manager, 2018-2020|KEMRI - Wellcome Trust Research Programme"
   },
   {
     "objectID": "posts.html",
     "href": "posts.html",
     "title": "posts",
     "section": "",
-    "text": "End-to-end Machine Learning (MLflow + Docker + Google Cloud)\n\n\n\n\n\n\nQuarto\n\n\nPython\n\n\nMLflow\n\n\n\nWriting R packages using devtools, roxygen2 and usethis packages\n\n\n\n\n\nAug 2, 2025\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nR package development guide\n\n\n\n\n\n\nQuarto\n\n\nR\n\n\npackages\n\n\n\nWriting R packages using devtools, roxygen2 and usethis packages\n\n\n\n\n\nDec 16, 2023\n\n\nBasil Okola\n\n\n\n\n\n\nNo matching items"
+    "text": "End-to-end Machine Learning (MLflow + Docker + Google Cloud)\n\n\n\nQuarto\n\nPython\n\nMLflow\n\n\n\nMachine learning Workflow using MLflow locally and pushing image to google cloud\n\n\n\n\n\nAug 2, 2025\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nR package development guide\n\n\n\nQuarto\n\nR\n\npackages\n\n\n\nWriting R packages using devtools, roxygen2 and usethis packages\n\n\n\n\n\nDec 16, 2023\n\n\nBasil Okola\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/2023-12-16-R-package dev/index.html",
