@@ -26,7 +26,7 @@ I set out to understand how to scrape data using Python. I explored `beautifulso
 
 # Project-based Data Engineering
 
-This is an accompanying "do-it-yourself" as I go through data engineering material from DuckDb. It is my initiative to learn how to to build data pipelines with **Python**, **SQL** & **DuckDB**. The first part is about ingestion, involving reading public data from Google Cloud, writing it locally as .csv or to MotherDuck database. [Github](https://github.com/Bokola/duckdb_flow) for project materials and a [post](http://bokola.github.io/posts/2025-08-08-data-engineering/)
+This is an accompanying "do-it-yourself" as I go through data engineering material from DuckDb. It is my initiative to learn how to to build data pipelines with **Python**, **SQL** & **DuckDB**. The first part is about ingestion, involving reading public data from Google Cloud, writing it locally as .csv or to MotherDuck database. [Github](https://github.com/Bokola/duckdb_flow) for project materials and a [post](https://bokola.github.io/posts/2025-08-08-data-engineering/)
 
 ```{r, include=FALSE}
 1 + 1

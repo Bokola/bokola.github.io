@@ -166,5 +166,26 @@
     "title": "End-to-end Data Engineering with Python DuckDB, Google Cloud, dbt",
     "section": "Exploring the data",
     "text": "Exploring the data\nHead to your google cloud console, then under BigQuery search “file_downloads” and click SEARCH ALL PROJECTS.\n\nimg_f = \"./docs/big_query_search.png\"\nimg = Image.open(img_f)\ndisplay(img)\n\n\n\n\n\n\n\n\nLimit your query to a given timestamp as the data is very big.\n\nimg_f = \"./docs/query.png\"\nimg = Image.open(img_f)\ndisplay(img)\n\n\n\n\n\n\n\n\nThe ingestion part is bundled in /ingestion directory with the following primary files:\n\n!tree ./ingestion\n\n\n./ingestion\n\n├── bigquery.py\n\n├── duck.py\n\n├── models.py\n\n├── pipeline.py\n\n└── __pycache__\n\n    ├── bigquery.cpython-312.pyc\n\n    └── pipeline.cpython-312.pyc\n\n\n\n2 directories, 6 files\n\n\n\n\n\nbigquery.py has BigQuery helpers to get the client, get query results and query the public dataset\nduck.py contains DuckDB helpers to create a table from a dataframe, and write to a local or MotherDuck database\nmodels.py defines table schema\npipeline runs the ingestion pipeline use pydantic syntax\n\nThe pipeline was successfuly executed and data written locally and to motherduck:\n\nimg_f = \"./docs/motherduck_db.png\"\nimg = Image.open(img_f)\ndisplay(img)"
+  },
+  {
+    "objectID": "posts/2025-08-08-data-engineering/index.html",
+    "href": "posts/2025-08-08-data-engineering/index.html",
+    "title": "End-to-end Data Engineering with Python DuckDB, Google Cloud, dbt",
+    "section": "",
+    "text": "BibTeX citation:@online{okola2025,\n  author = {Okola, Basil},\n  title = {End-to-End {Data} {Engineering} with {Python} {DuckDB,}\n    {Google} {Cloud,} Dbt},\n  date = {2025-08-08},\n  url = {https://bokola.github.io/posts/2025-08-08-data-engineering/},\n  langid = {en}\n}\nFor attribution, please cite this work as:\nOkola, Basil. 2025. “End-to-End Data Engineering with Python\nDuckDB, Google Cloud, Dbt.” August 8, 2025. https://bokola.github.io/posts/2025-08-08-data-engineering/.\nThis is a ‘do it along’ following DuckDB material. We will source data from PyPi, a repository of python packages providing logs of how given libraries have been used across platforms, transform it into relevant tables, and feed it into a dashboard using SQL, dtb - a tool for building modular, maintainable data pipelines to power analytics, and DuckDB - an in-process SQL online analytical processing (OLAPs) relational database management system; then use evidence to create a dashboard utilizing SQL and markdown."
+  },
+  {
+    "objectID": "posts/2025-08-08-data-engineering/index.html#part-1-ingestion-pipeline",
+    "href": "posts/2025-08-08-data-engineering/index.html#part-1-ingestion-pipeline",
+    "title": "End-to-end Data Engineering with Python DuckDB, Google Cloud, dbt",
+    "section": "Part 1: Ingestion pipeline",
+    "text": "Part 1: Ingestion pipeline\n\nSetup & requirements\n\nPython 3.12\nPoetry for dependency management\nMake to run Makefile commands\nA Google Cloud account to fetch the source data. Free tier covers any computing cost.\nA host of libraries: poetry duckdb google-cloud-bigquery google-auth google-cloud-bigquery-storage pyarrow pandas fire loguru pydantic pytest ruff\n\nThe architecture woul look like below\n\nfrom PIL import Image\nfrom IPython.display import display\n\nimg_f = \"./docs/architecture.png\"\nimg = Image.open(img_f)\ndisplay(img)"
+  },
+  {
+    "objectID": "posts/2025-08-08-data-engineering/index.html#exploring-the-data",
+    "href": "posts/2025-08-08-data-engineering/index.html#exploring-the-data",
+    "title": "End-to-end Data Engineering with Python DuckDB, Google Cloud, dbt",
+    "section": "Exploring the data",
+    "text": "Exploring the data\nHead to your google cloud console, then under BigQuery search “file_downloads” and click SEARCH ALL PROJECTS.\n\nimg_f = \"./docs/big_query_search.png\"\nimg = Image.open(img_f)\ndisplay(img)\n\n\n\n\n\n\n\n\nLimit your query to a given timestamp as the data is very big.\n\nimg_f = \"./docs/query.png\"\nimg = Image.open(img_f)\ndisplay(img)\n\n\n\n\n\n\n\n\nThe ingestion part is bundled in /ingestion directory with the following primary files:\n\n!tree ./ingestion\n\n\n./ingestion\n\n├── bigquery.py\n\n├── duck.py\n\n├── models.py\n\n├── pipeline.py\n\n└── __pycache__\n\n    ├── bigquery.cpython-312.pyc\n\n    └── pipeline.cpython-312.pyc\n\n\n\n2 directories, 6 files\n\n\n\n\n\nbigquery.py has BigQuery helpers to get the client, get query results and query the public dataset\nduck.py contains DuckDB helpers to create a table from a dataframe, and write to a local or MotherDuck database\nmodels.py defines table schema\npipeline runs the ingestion pipeline use pydantic syntax\n\nThe pipeline was successfuly executed and data written locally and to motherduck:\n\nimg_f = \"./docs/motherduck_db.png\"\nimg = Image.open(img_f)\ndisplay(img)"
   }
 ]

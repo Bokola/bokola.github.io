@@ -18,7 +18,7 @@
   </url>
   <url>
     <loc>https://bokola.github.io/about.html</loc>
-    <lastmod>2025-08-08T11:26:06.132Z</lastmod>
+    <lastmod>2025-08-08T11:53:01.728Z</lastmod>
   </url>
   <url>
     <loc>https://bokola.github.io/posts/2025-08-02-End-to-end-ML-with-MLflow/index.html</loc>
@@ -31,5 +31,9 @@
   <url>
     <loc>https://bokola.github.io/posts/2025-08-08-data-enginnering/index.html</loc>
     <lastmod>2025-08-08T11:47:17.618Z</lastmod>
+  </url>
+  <url>
+    <loc>https://bokola.github.io/posts/2025-08-08-data-engineering/index.html</loc>
+    <lastmod>2025-08-08T11:53:43.374Z</lastmod>
   </url>
 </urlset>
