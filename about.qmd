@@ -22,7 +22,7 @@ This is an account of my learning journey aided by [this](https://mlflow.org/doc
 
 # Web scraping: getting data from the internet
 
-I set out to understand how to scrape data using Python. I explored `beautifulsoup`, `requests`, `scrapingBee` API, and `scrapy` to scrape data from Google news and a product listing page. I wrote a [piece](http://bokola.github.io/posts/2025-08-03-Web-scraping-python/) about it too.
+I set out to understand how to scrape data using Python. I explored `beautifulsoup`, `requests`, `scrapingBee` API, and `scrapy` to scrape data from Google news and a product listing page. I wrote a [piece](http://bokola.github.io/posts/2025-08-03-Web-scraping-python/) about it too. I have also scheduled this to run daily using github actions.
 
 # Project-based Data Engineering
 
