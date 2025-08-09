@@ -18,7 +18,7 @@ This was a 'do it yourself too' as I was reading an online version of [Rodrigues
 
 # End-to-end Machine Learning (MLflow + Docker + Google cloud)
 
-This is an account of my learning journey aided by [this](https://mlflow.org/docs/latest/ml/getting-started/hyperparameter-tuning/) tutorial to grasp the nitty-gritties of building, logging, saving and serving machine learning models. The code available at this [repo](https://github.com/Bokola/DeepLearn/tree/main/MLflow) and a write-up is [here](http://bokola.github.io/posts/2025-08-08-End-to-end-ML-with-MLflow/).
+This is an account of my learning journey aided by [this](https://mlflow.org/docs/latest/ml/getting-started/hyperparameter-tuning/) tutorial to grasp the nitty-gritties of building, logging, saving and serving machine learning models. The code available at this [repo](https://github.com/Bokola/DeepLearn/tree/main/MLflow) and a write-up is [here](http://bokola.github.io/posts/2025-08-02-End-to-end-ML-with-MLflow/).
 
 # Web scraping: getting data from the internet
 
