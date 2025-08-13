@@ -28,6 +28,11 @@ I set out to understand how to scrape data using Python. I explored `beautifulso
 
 This is an accompanying "do-it-yourself" as I go through data engineering material from DuckDb. It is my initiative to learn how to to build data pipelines with **Python**, **SQL** & **DuckDB**. The first part is about ingestion, involving reading public data from Google Cloud, writing it locally as .csv or to MotherDuck database. [Github](https://github.com/Bokola/duckdb_flow) for project materials and a [post](https://bokola.github.io/posts/2025-08-08-data-engineering/)
 
+
+# ELT pipeline with dbt, snowflake, and dagster
+
+Created an ELT pipeline that uses a dbt project to read and write tables to a snowflake warehouse database, then orchestrated the workflow with dagster. [Github repo](https://github.com/Bokola/data_pipeline).
+
 ```{r, include=FALSE}
 1 + 1
 ```
