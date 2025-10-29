@@ -25,7 +25,7 @@
     "href": "posts.html",
     "title": "posts",
     "section": "",
-    "text": "End-to-end Data Engineering with Python DuckDB, Google Cloud, dbt\n\n\n\nQuarto\n\nPython\n\nbeautifulsoup\n\nscrapy\n\nscrapingBee\n\n\n\nPart 1: Data Ingestion\n\n\n\n\n\nAug 8, 2025\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nWeb Scraping with Python\n\n\n\nQuarto\n\nPython\n\nbeautifulsoup\n\nscrapy\n\nscrapingBee\n\n\n\nScraping data from the web using {beautifulsoup4}, {requests}, {ScrapingBee}, and {Scrapy}\n\n\n\n\n\nAug 3, 2025\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nEnd-to-end Machine Learning (MLflow + Docker + Google Cloud)\n\n\n\nQuarto\n\nPython\n\nMLflow\n\n\n\nMachine learning Workflow using MLflow locally and pushing image to google cloud\n\n\n\n\n\nAug 2, 2025\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nR package development guide\n\n\n\nQuarto\n\nR\n\npackages\n\n\n\nWriting R packages using devtools, roxygen2 and usethis packages\n\n\n\n\n\nDec 16, 2023\n\n\nBasil Okola\n\n\n\n\n\nNo matching items"
+    "text": "Publication ready visualization in R\n\n\n\nggplot2\n\ncowplot\n\n\n\n\n\n\n\n\n\nOct 29, 2025\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nEnd-to-end Data Engineering with Python DuckDB, Google Cloud, dbt\n\n\n\nQuarto\n\nPython\n\nbeautifulsoup\n\nscrapy\n\nscrapingBee\n\n\n\nPart 1: Data Ingestion\n\n\n\n\n\nAug 8, 2025\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nWeb Scraping with Python\n\n\n\nQuarto\n\nPython\n\nbeautifulsoup\n\nscrapy\n\nscrapingBee\n\n\n\nScraping data from the web using {beautifulsoup4}, {requests}, {ScrapingBee}, and {Scrapy}\n\n\n\n\n\nAug 3, 2025\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nEnd-to-end Machine Learning (MLflow + Docker + Google Cloud)\n\n\n\nQuarto\n\nPython\n\nMLflow\n\n\n\nMachine learning Workflow using MLflow locally and pushing image to google cloud\n\n\n\n\n\nAug 2, 2025\n\n\nBasil Okola\n\n\n\n\n\n\n\n\n\n\n\n\nR package development guide\n\n\n\nQuarto\n\nR\n\npackages\n\n\n\nWriting R packages using devtools, roxygen2 and usethis packages\n\n\n\n\n\nDec 16, 2023\n\n\nBasil Okola\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/2023-12-16-R-package dev/index.html",
@@ -187,5 +187,19 @@
     "title": "End-to-end Data Engineering with Python DuckDB, Google Cloud, dbt",
     "section": "Exploring the data",
     "text": "Exploring the data\nHead to your google cloud console, then under BigQuery search “file_downloads” and click SEARCH ALL PROJECTS.\n\nimg_f = \"./docs/big_query_search.png\"\nimg = Image.open(img_f)\ndisplay(img)\n\n\n\n\n\n\n\n\nLimit your query to a given timestamp as the data is very big.\n\nimg_f = \"./docs/query.png\"\nimg = Image.open(img_f)\ndisplay(img)\n\n\n\n\n\n\n\n\nThe ingestion part is bundled in /ingestion directory with the following primary files:\n\n!tree ./ingestion\n\n\n./ingestion\n\n├── bigquery.py\n\n├── duck.py\n\n├── models.py\n\n├── pipeline.py\n\n└── __pycache__\n\n    ├── bigquery.cpython-312.pyc\n\n    └── pipeline.cpython-312.pyc\n\n\n\n2 directories, 6 files\n\n\n\n\n\nbigquery.py has BigQuery helpers to get the client, get query results and query the public dataset\nduck.py contains DuckDB helpers to create a table from a dataframe, and write to a local or MotherDuck database\nmodels.py defines table schema\npipeline runs the ingestion pipeline use pydantic syntax\n\nThe pipeline was successfuly executed and data written locally and to motherduck:\n\nimg_f = \"./docs/motherduck_db.png\"\nimg = Image.open(img_f)\ndisplay(img)"
+  },
+  {
+    "objectID": "posts/2025-10-29-data-pub-ready-viz/index.html",
+    "href": "posts/2025-10-29-data-pub-ready-viz/index.html",
+    "title": "Publication ready visualization in R",
+    "section": "",
+    "text": "CitationBibTeX citation:@online{okola2025,\n  author = {Okola, Basil},\n  title = {Publication Ready Visualization in {R}},\n  date = {2025-10-29},\n  url = {https://bokola.github.io/posts/2025-10-29-pub-ready-viz/},\n  langid = {en}\n}\nFor attribution, please cite this work as:\nOkola, Basil. 2025. “Publication Ready Visualization in R.”\nOctober 29, 2025. https://bokola.github.io/posts/2025-10-29-pub-ready-viz/."
+  },
+  {
+    "objectID": "posts/2025-10-29-pub-ready-viz/index.html",
+    "href": "posts/2025-10-29-pub-ready-viz/index.html",
+    "title": "Publication ready visualization in R",
+    "section": "",
+    "text": "CitationBibTeX citation:@online{okola2025,\n  author = {Okola, Basil},\n  title = {Publication Ready Visualization in {R}},\n  date = {2025-10-29},\n  url = {https://bokola.github.io/posts/2025-10-29-pub-ready-viz/},\n  langid = {en}\n}\nFor attribution, please cite this work as:\nOkola, Basil. 2025. “Publication Ready Visualization in R.”\nOctober 29, 2025. https://bokola.github.io/posts/2025-10-29-pub-ready-viz/."
   }
 ]

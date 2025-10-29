@@ -1,0 +1,17 @@
+---
+title: "Publication ready visualization in R"
+# description: "Part 1: Data Ingestion"
+author:
+  - name: Basil Okola
+    url: https://bokola.github.io/
+    # orcid: 0000-0002-5300-3075
+    affiliation: Master of Statistics and Data Science @ Hasselt University
+    affiliation-url: https://ucsb-meds.github.io/ 
+date: 2025-10-29
+categories: [ggplot2, cowplot] # self-defined categories
+include-after-body: pub_ready_viz.html
+citation: 
+  url: https://bokola.github.io/posts/2025-10-29-pub-ready-viz/ 
+
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
