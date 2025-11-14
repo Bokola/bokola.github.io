@@ -18,7 +18,7 @@
   </url>
   <url>
     <loc>https://bokola.github.io/about.html</loc>
-    <lastmod>2025-08-13T13:10:49.164Z</lastmod>
+    <lastmod>2025-11-14T12:43:53.136Z</lastmod>
   </url>
   <url>
     <loc>https://bokola.github.io/posts/2025-08-02-End-to-end-ML-with-MLflow/index.html</loc>
@@ -47,5 +47,9 @@
   <url>
     <loc>https://bokola.github.io/posts/2025-10-30-interactive-maps/index.html</loc>
     <lastmod>2025-10-30T14:29:21.950Z</lastmod>
+  </url>
+  <url>
+    <loc>https://bokola.github.io/posts/2025-10-30-interactive-maps/interactive-maps.html</loc>
+    <lastmod>2025-10-30T14:24:22.737Z</lastmod>
   </url>
 </urlset>

@@ -157,7 +157,8 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="shiny-web-app" class="level1">
 <h1>Shiny web app</h1>
-<p><code>{shiny}</code> is undoubtedly a go to tool for building a web app that runs in production or just for presenting a proof of concept. I developed a <a href="https://bokola.shinyapps.io/shinyApp-data-quality/">small app</a> as proof that I understand the underlying framework to be able to build an app that can be used in production.</p>
+<p><code>{shiny}</code> is undoubtedly a go to tool for building a web app that runs in production or just for presenting a proof of concept. I have been reading about using <a href="https://github.com/ThinkR-open/golem"><code>{golem}</code></a> in packaging and modularizing shiny applications for better project level management (being a package you able to document, check, and test every function), and other reproducubility benefits (for instance docker images). I was able to modularize parts of a <a href="https://vac-lshtm.shinyapps.io/ncov_tracker/#">COVID-19 dashboard</a> initially developed by a team from LHSTM, into a golem-framework application called <a href="https://github.com/Bokola/COVID19Dash">COVID19Dash</a>. It was a challenging navigating a large codebase and breaking it into parts, troubleshooting instances of some lines of code not running in an isolated environment, the kind we work with during package package development and docker image building/serving.</p>
+<p>Prior to this, I had also developed a <a href="https://bokola.shinyapps.io/shinyApp-data-quality/">small app</a> as proof that I understand the underlying framework to be able to build an app that can be used in production.</p>
 </section>
 <section id="reproducible-analytical-pipelines-in-r" class="level1">
 <h1>Reproducible analytical pipelines in R</h1>
