@@ -1,0 +1,662 @@
+---
+title: "Adaptive Methods for Clinical Trials"
+description: "A simulation approach to adaptive clinical trial designs"
+author:
+  - name: Basil Okola
+    url: https://bokola.github.io/
+    # orcid: 0000-0002-5300-3075
+    affiliation: Master of Statistics and Data Science @ Hasselt University
+    affiliation-url: https://ucsb-meds.github.io/ 
+date: 2026-01-12
+code-fold: true
+categories: [biostatistics,adaptive designs, interim analysis, simulations] # self-defined categories
+# include-after-body: pub_ready_viz.html
+citation: 
+  url: https://bokola.github.io/posts/2026-01-12-Adaptive-designs/ 
+
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+bibliography: reference.bib
+---
+
+# Adaptive trials: A study reproducibility simulation approach [@jayawardana2025practical]
+
+Adaptive trials allow for modifications along the course of the trials. Common 
+modifications include sample size adjustment, dropping an arm (if futile), or 
+even adjusting allocation probabilities. Group sequential design is one of the 
+most utilized forms of adaptive designs allowing for multiple planned interim 
+analyses with pre-specified rules for early stopping. Here, we take a simulation
+approach to understand adaptive designs.
+
+```{r}
+pacman::p_load(flextable, dplyr, future.apply, progressr)
+```
+
+
+## Randomisation
+
+For simplicity, we use 1:1 treatment allocation ratio using block randomisation
+of size 4. Uniform random numbers are used to to order treatment allocations
+thereby producing a sequential list of treatment allocations for consecutively
+recruited participants.
+
+```{r}
+#' Randomize participants to treatment arms
+#'
+#' @param n sample size
+#' @param blocks randomisation blocks
+#'
+#' @returns a dataframe
+#' @export
+#'
+#' @examples
+simRandomisation <- function(n=584, blocks = 4){
+  # blocking sequnce
+  block <- rep(seq(1:n), each = blocks, length.out = n)
+  # treatment sequence
+  trt <- rep(0:1, length.out = n)
+  # a random number on a unit interval
+  set.seed(as.numeric(Sys.Date()))
+  random <- runif(n)
+  df <- data.frame(block, trt, random)
+  df <- df[order(df$block, df$random),]
+  df$obs <- 1:n
+  df <- df[, c("obs", "trt")]
+  return(df)
+}
+```
+
+If we wanted to adjust allocation ratios:
+
+```{r}
+#' Randomize participants to treatment arms
+#'
+#' @param n sample size
+#' @param blocks randomisation blocks
+#' @param ratio randomization ratio
+#' 
+#' @returns a dataframe
+#' @export
+#'
+#' @examples
+simRandomisation <- function(n = 584, blocks = 4, ratio = c(1, 1)) {
+
+  # 1. Define the possible treatment groups (0, 1, 2...) based on ratio length
+  trts <- 0:(length(ratio) - 1)
+  
+  # 2. Create the sequence by sampling within each block
+  # We use 'replicate' to generate each block independently
+  num_blocks <- ceiling(n / blocks)
+  
+  result <- replicate(num_blocks, {
+    sample(trts, size = blocks, replace = TRUE, prob = ratio)
+  })
+  
+  # 3. Flatten the matrix into a vector and trim to length n
+  trt_vector <- as.vector(result)[1:n]
+  
+  # 4. Return as a clean data frame
+  return(data.frame(obs = 1:n, trt = trt_vector))
+}
+```
+
+## Participant accrual
+
+We assume participant accrual is constant over time and would take 928 days.
+
+```{r}
+#' Simulate participant accrual
+#'
+#' @param n sample size
+#' @param recruit_period accrual period in days
+#'
+#' @returns a vector
+#' @export
+#'
+#' @examples
+simAccrual <- function(n = 584, recruit_period = 928){
+  # simulate trial times that patient enters the trial
+  # adding 0.5 to ensure recruitment times > day 1 when rounded
+  accrual_time <- round(runif(n) * recruit_period + 0.5)
+  accrual_time <- sort(accrual_time)
+  return(accrual_time)
+}
+```
+
+If patient accrual was not constant over time, we'd consider a beta distribution
+
+```{r}
+#' Simulate participant accrual
+#'
+#' @param n sample size
+#' @param recruit_period accrual period (days)
+#' @param alpha alpha shape parameter
+#' @param beta beta shape parameter
+#'
+#' @returnsa vector
+#' @export
+#'
+#' @examples
+simAccrual <- function(n = 584, recruit_period = 928, alpha = 1, beta = 1) {
+  
+  # 1. Generate random numbers using a Beta distribution
+  # rbeta(n, shape1, beta) returns values between 0 and 1
+  # alpha= beta = 1 is equivalent to runif (constant accrual)
+  # alpha= 2, beta = 1 creates a "late peak" (accelerating accrual)
+  # alpha= 1, beta = 2 creates an "early peak" (decelerating accrual)
+  # alpha= 2, beta = 2 creates a "bell curve" (peak in middle)
+  
+  accrual_proportions <- rbeta(n, alpha, beta)
+  
+  # 2. Scale the 0-1 values to the actual recruit_period
+  accrual_time <- round(accrual_proportions * recruit_period + 0.5)
+  
+  # 3. Sort to represent chronological entry
+  accrual_time <- sort(accrual_time)
+  
+  return(accrual_time)
+}
+```
+
+## Generate participant outcomes
+
+Choice of probability distribution depends on the outcome variable. You could use
+the binomial distribution for a binary outcome, normal distribution for a continuous
+outcome, or Weibull/exponential for time-to-event outcome.
+
+```{r}
+#' Simulate trial data with outcome variable
+#'
+#' @param n sample size
+#' @param recruit_period recruitment period (days)
+#' @param p vactor of event probabilities
+#'
+#' @returns a dataframe
+#' @export
+#'
+#' @examples
+simTrialData <- function(n = 584, recruit_period = 928, p){
+  # simulate random allocations
+  data <- simRandomisation()
+  # simulate accrual
+  data$accrual <- simAccrual()
+  # simulate events from binomial dist
+  data$event <- rbinom(n, 1, p[data$trt+1])
+  
+  return(data)
+}
+```
+
+
+## Identify data available at interim analysis
+
+We assume outcome to be available immediately after recruitment and the time of 
+interim analysis to be when a pre-determined number of events to be 20. As the data
+is ordered by accrual time, we can calculate cumulative number of events `cum_events`
+with `cum_events=20` indicating the planned time of the interim analysis. Since
+we assume no time lag between recruitment and outcome assessment, the outcome at
+the interim (`event_iterim: 0,1`) would be the same as the outcome at final time
+point (`event`) for participants included in the interim analysis (i.e.,
+for observations where `obs <= interim_ind`)
+
+
+```{r}
+#' Identify interim data  
+#'
+#' @param data a dataframe
+#' @param events_at_interim number of events at interim
+#'
+#' @returns a dataframe
+#' @export
+#'
+#' @examples
+simInterimData <- function(data, events_at_interim = 20){
+  # cumulative events
+  data$cum_events <- cumsum(data$event)
+  # when does interim occur
+  data$interim_ind <- data$obs[min(which(data$cum_events == events_at_interim))]
+  # events at interim
+  data$event_interim <- with(data, ifelse(obs <= interim_ind, event, NA))
+  
+  return(data)
+}
+```
+
+## Analyze trial data
+
+During interim analysis we seek to find out:
+
+* if trial would have stopped before maximum recruitment
+* point estimates and their CIs for treatment effect
+* sample size at the point of stopping the trial
+* if the study would have found evidence of clinically relevant treatment effect
+or if it was a futile trial
+
+```{r}
+#' Analyze trial data
+#'
+#' @param data trial dataframe
+#' @param alpha_interim alpha spend at interim analysis
+#' @param alpha_final alpha spend at final analysis
+#'
+#' @returns a dataframe
+#' @export
+#'
+#' @examples
+analyseData <- function(data, alpha_interim, alpha_final){
+  nevents0 <- sum(data$event[data$trt == 0])
+  nevents1 <- sum(data$event[data$trt == 1])
+  pevents0 <- nevents0/sum(data$trt ==0)
+  pevents1 <- nevents1/sum(data$trt ==1)
+  
+  # logistic reg at interim
+  data$event_interim <- factor(data$event_interim)
+  logit_interim <- glm(event_interim ~ trt, data = data, family = "binomial")
+  conf_int <- confint(logit_interim)
+  
+  # results at interim
+  
+  interim_or <- exp(coef(logit_interim)["trt"])
+  interim_lci <- exp(conf_int["trt", "2.5 %"])
+  interim_uci <- exp(conf_int["trt", "97.5 %"])
+  interim_p <- coef(summary(logit_interim))["trt", "Pr(>|z|)"]
+  
+  # stop for trial success at interim
+  interim_stop <- ifelse(interim_p < alpha_interim, 1, 0)
+  
+  # the proportion of events if the trial stopped at interim
+  
+  if(interim_stop == 1){
+    nevents0 <- sum(data$event[data$trt == 0 & !is.na(data$event_interim)])
+    nevents1 <- sum(data$event[data$trt == 1 & !is.na(data$event_interim)])
+    pevents0 <- nevents0/sum(data$trt == 0 & !is.na(data$event_interim))
+    pevents1 <- nevents1/sum(data$trt == 1 & !is.na(data$event_interim))
+  }
+  # final analysis
+  data$event <- factor(data$event)
+  logit <- glm(event ~ trt, data = data, family = "binomial")
+  conf <- confint(logit)
+  
+  # results at final analysis
+  final_or <- exp(coef(logit)["trt"])
+  final_lci <- exp(conf["trt", "2.5 %"])
+  final_uci <- exp(conf["trt", "97.5 %"])
+  final_p <- coef(summary(logit))["trt", "Pr(>|z|)"]
+  
+  final_stop <- ifelse(final_p < alpha_final, 1, 0)
+  
+  # is the trial conclusive?
+  stop <- ifelse(interim_stop == 1, interim_stop, final_stop)
+  
+  # sample size (used to determine average sample size)
+  
+  if(interim_stop == 1){
+    sample_size <- unique(data$interim_ind)
+  } else{
+    sample_size <- nrow(data)
+  }
+  
+  # determine trial flip-flop probability
+  flipflop <- ifelse(interim_stop == 1 & final_stop == 0, 1, 0)
+  
+  results <- data.frame(
+    nevents0, nevents1, pevents0, pevents1, sample_size,
+    interim_time = unique(data$interim_ind),
+    interim_or, interim_lci, interim_uci, interim_p, interim_stop,
+    final_or, final_lci, final_uci, final_p, final_stop, stop, flipflop
+  )
+  return(results)
+}
+```
+
+Avoid in model.matrix.default(mt, mf, contrasts) : variable 1 has no levels errors
+
+
+```{r}
+#' Analyze trial data
+#'
+#' @param data trial dataframe
+#' @param alpha_interim alpha spend at interim analysis
+#' @param alpha_final alpha spend at final analysis
+#'
+#' @returns a dataframe
+#' @export
+#'
+#' @examples
+#' 
+
+
+analyseData <- function(data, alpha_interim, alpha_final){
+  
+  # Helper to check if GLM can run (needs variation in both Y and X)
+  is_estimable <- function(df, outcome_col) {
+    if (nrow(df) == 0) return(FALSE)
+    has_outcome_var <- length(unique(df[[outcome_col]])) > 1
+    has_trt_var     <- length(unique(df$trt)) > 1
+    return(has_outcome_var && has_trt_var)
+  }
+
+  # --- Initial Calculations (Total Trial potential) ---
+  nevents0 <- sum(data$event[data$trt == 0], na.rm = TRUE)
+  nevents1 <- sum(data$event[data$trt == 1], na.rm = TRUE)
+  pevents0 <- nevents0 / sum(data$trt == 0)
+  pevents1 <- nevents1 / sum(data$trt == 1)
+  
+  # --- Interim Analysis ---
+  # Filter data to only those available at interim for the model
+  interim_data <- data[!is.na(data$event_interim), ]
+  interim_estimable <- is_estimable(interim_data, "event_interim")
+  
+  if(interim_estimable){
+    logit_interim <- glm(factor(event_interim) ~ trt, data = interim_data, family = "binomial")
+    interim_p     <- coef(summary(logit_interim))["trt", "Pr(>|z|)"]
+    conf_int      <- confint.default(logit_interim) 
+    interim_or    <- exp(coef(logit_interim)["trt"])
+    interim_lci   <- exp(conf_int["trt", 1])
+    interim_uci   <- exp(conf_int["trt", 2])
+  } else {
+    interim_p <- interim_or <- interim_lci <- interim_uci <- NA
+  }
+  
+  # Stop for trial success at interim
+  interim_stop <- ifelse(!is.na(interim_p) && interim_p < alpha_interim, 1, 0)
+  
+  # Update event stats if the trial stopped at interim
+  if(interim_stop == 1){
+    nevents0 <- sum(interim_data$event[interim_data$trt == 0])
+    nevents1 <- sum(interim_data$event[interim_data$trt == 1])
+    pevents0 <- nevents0 / sum(interim_data$trt == 0)
+    pevents1 <- nevents1 / sum(interim_data$trt == 1)
+    sample_size <- nrow(interim_data)
+  } else {
+    sample_size <- nrow(data)
+  }
+  
+  # --- Final Analysis ---
+  final_estimable <- is_estimable(data, "event")
+  
+  if(final_estimable){
+    logit    <- glm(factor(event) ~ trt, data = data, family = "binomial")
+    final_p  <- coef(summary(logit))["trt", "Pr(>|z|)"]
+    conf     <- confint.default(logit)
+    final_or  <- exp(coef(logit)["trt"])
+    final_lci <- exp(conf["trt", 1])
+    final_uci <- exp(conf["trt", 2])
+  } else {
+    final_p <- final_or <- final_lci <- final_uci <- NA
+  }
+  
+  final_stop <- ifelse(!is.na(final_p) && final_p < alpha_final, 1, 0)
+  
+  # --- Logic Summary ---
+  stop     <- ifelse(interim_stop == 1, 1, final_stop)
+  flipflop <- ifelse(interim_stop == 1 & final_stop == 0, 1, 0)
+  
+  # Build the final data frame
+  results <- data.frame(
+    nevents0, 
+    nevents1, 
+    pevents0, 
+    pevents1, 
+    sample_size,
+    interim_time = max(data$interim_ind, na.rm = TRUE), # Assuming this is a time-point or ID
+    interim_or, 
+    interim_lci, 
+    interim_uci, 
+    interim_p, 
+    interim_stop,
+    final_or, 
+    final_lci, 
+    final_uci, 
+    final_p, 
+    final_stop, 
+    stop, 
+    flipflop
+  )
+  
+  return(results)
+}
+```
+
+
+## Simulate a single trial
+
+```{r}
+#' Run a single experiment
+#'
+#' @param n sample size
+#' @param recruit_period accrual period
+#' @param p vector of treatment success probability
+#' @param events_at_interim number of events at interim
+#' @param alpha_interim interim alpha spend
+#' @param alpha_final final alpha spend
+#'
+#' @returns a dataframe
+#' @export
+#'
+#' @examples
+runTrial <- function(n, recruit_period, p, events_at_interim, alpha_interim, alpha_final){
+  #1. simulate trial data
+  df <- simTrialData(n, recruit_period, p)
+  #2. create interim data
+  df <- simInterimData(df, events_at_interim)
+  #3. Analyze data
+  results <- analyseData(df, alpha_interim, alpha_final)
+  return(list(data = df, results = results))
+}
+```
+
+
+```{r}
+# inputs
+inputs <- data.frame(
+  seed = as.numeric(Sys.Date()),
+  # recruitment period = Days in 2.5 years   
+  #584/690 is the target/total possible = efficiency ratio
+  recruit_period = 365.25 * 3 * 584/ 690,
+  n = 584,
+  events_at_interim = 20,
+  p0 = 0.10,
+  p1 = 0.04,
+  # p = c(p0, p1)
+  alpha_final = 0.045,
+  alpha_interim = 0.005
+  
+)
+p <- c(inputs$p0, inputs$p1)
+
+dict <- data.frame(
+  variable = c(
+    'nevents0','nevents1', 'pevents0', 'pevents1', 'sample_size', 'interim_time',
+    "interim_or", "interim_lci", "interim_uci", "interim_p", "interim_stop",
+    "final_or", "final_lci", "final_uci", "final_p", "final_stop", "stop",
+    "flipflop"
+  ),
+  label = c(
+    "Number of events in control group",
+    "Number of events in experimental group",
+    "Proportion of events in control group",
+    "Proportion of events in experimental group",
+    "Sample size",
+    "Time (days) at interim",
+    "Odds ratio at interim",
+    "Lower CI for OR at interim",
+    "Upper CI for OR at interim",
+    "P-value of any difference in treatments at interim",
+    "Whether the trial would have stopped at interim",
+    "Odds ratio at final analysis",
+    "Lower CI for odds ratio",
+    "Upper CI for odds ratio",
+    "P-value for treatment difference at final analysis",
+    "Whether the trial is conclusive at final analysis",
+    "Whether the trial was conclusive (at final or interim)",
+    "The probability of trial flip-flopping"
+    
+    
+  )
+)
+```
+
+
+```{r}
+set.seed(inputs$seed)
+
+results_singleTrial <- runTrial(
+  inputs$n, inputs$recruit_period, p, inputs$events_at_interim,
+  inputs$alpha_interim, inputs$alpha_final
+)
+results <- results_singleTrial$results|> round(3)  |> t() |> as.data.frame() 
+names(results)[1] <- "value"
+results$variable <- rownames(results)
+rownames(results) <- NULL
+results <- left_join(results, dict)
+results <- results[, c("variable", "label", "value")]
+  
+```
+
+```{r}
+#| label: tbl-singleT
+#| tbl-cap: "Results from a single simulated trial"
+tab_singleT <- flextable(results) |> theme_vanilla() 
+tab_singleT
+```
+
+## Simulate multiple trials
+
+
+```{r}
+runMultipleTrials <- function(nsims, seed, n, recruit_period, p, 
+                              events_at_interim, alpha_interim, alpha_final){
+  # random seed
+  seeds <- seed + seq(1: nsims)
+  # simulate
+  multiple_trials <- lapply(1:nsims, function(x){
+    set.seed(seeds[x])
+    y <- runTrial(n, recruit_period, p, events_at_interim, alpha_interim,
+                  alpha_final)
+    return(y)
+  })
+  
+  # summarise
+  results <- lapply(multiple_trials, function(x) return(x$results))
+  results_all <- do.call(rbind, results)
+  # saveRDS(multiple_trials, file = "results_multTrials.rds")
+  
+  # remove any trials with non-estimable CIs and calculate summary
+  x <- which(apply(results_all, 1, function(x) any(is.na(x))))
+  if(length(x) > 0){
+    result_summary <- apply(results_all[-x,], 2, summary)
+  } else{
+    result_summary <- apply(results_all, 2, summary)
+  }
+  
+  return(
+    list(
+      results_all = results_all,
+      results_summary = results_summary,
+      seeds = seeds
+    )
+  )
+}
+```
+
+Parallelize computations using `future.apply}`
+
+```{r}
+library(future.apply)
+library(progressr)
+
+runMultipleTrials_Parallel <- function(nsims, seed, n, recruit_period, p_param, 
+                                       events_at_interim, alpha_interim, alpha_final) {
+  
+  # 1. Setup Parallel Backend
+  # Using 'multisession' is the most stable across Windows/Mac/Linux
+  plan(multisession, workers = parallelly::availableCores() - 1)
+  
+  # Ensure cleanup of workers when function finishes or crashes
+  on.exit(plan(sequential))
+  
+  seeds <- seed + seq_len(nsims)
+  
+  # 2. Access the progressor from the calling environment
+  p <- progressor(steps = nsims)
+  
+  # 3. Run Simulations
+  multiple_trials <- future_lapply(1:nsims, function(i) {
+    # Increment progress bar
+    p(message = sprintf("Simulating trial %g", i))
+    
+    set.seed(seeds[i])
+    
+    # Run the individual trial
+    # Note: I renamed your 'p' to 'p_param' to avoid conflict with progressor 'p'
+    y <- runTrial(n, recruit_period, p_param, events_at_interim, alpha_interim, alpha_final)
+    
+    return(y)
+  }, future.seed = TRUE) 
+  
+  # 4. Summarize Results
+  results <- lapply(multiple_trials, function(x) x$results)
+  results_all <- do.call(rbind, results)
+  
+  # Clean up non-estimable rows (NAs from glm failures)
+  results_clean <- results_all[complete.cases(results_all), ]
+  result_summary <- apply(results_clean, 2, summary)
+  
+  return(list(
+    results_all = results_all,
+    results_summary = result_summary,
+    seeds = seeds
+  ))
+}
+```
+
+
+
+```{r}
+#| include: false
+inputs$nsims <- 5000
+
+# 1. Capture the start time
+start_time <- Sys.time()
+
+# Setup how the progress bar looks
+handlers(handler_progress(
+  format   = ":spin [:bar] :percent | ETA: :eta",
+  clear    = FALSE, 
+  width    = 60
+))
+
+with_progress({
+  results_mulT <- runMultipleTrials_Parallel(
+  inputs$nsims, inputs$seed, inputs$n, inputs$recruit_period, p,
+  inputs$events_at_interim, inputs$alpha_interim, inputs$alpha_final
+)
+})
+
+# 3. Calculate and print the difference
+end_time <- Sys.time()
+execution_time <- as.numeric(difftime(end_time, start_time, units = "mins"))
+
+cat(sprintf("\nTotal Execution Time: %.2f minutes\n", execution_time))
+```
+
+
+Print results
+
+```{r}
+tab_mulT <- results_mulT$results_summary |> round(3) |> t() |> as.data.frame()
+tab_mulT$variable <- rownames(tab_mulT)
+rownames(tab_mulT) <- NULL
+names(tab_mulT) <- c("Minimum", "Q1", "Median", "Mean", "Q3", "Maximum", "variable")
+tab_mulT <- left_join(tab_mulT, dict) 
+tab_mulT <- tab_mulT |> select(variable, label, everything())
+names(tab_mulT) <- stringr::str_to_sentence(names(tab_mulT))
+
+```
+
+```{r}
+#| label: tbl-mulT
+#| tbl-cap: "Results from a multiple simulated trial"
+t_mulT <- flextable(tab_mulT) |> theme_vanilla() 
+t_mulT
+```
