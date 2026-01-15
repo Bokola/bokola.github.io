@@ -1,0 +1,593 @@
+---
+title: "Surveys: Design and Analysis"
+description: ""
+author:
+  - name: Basil Okola
+    url: https://bokola.github.io/
+    # orcid: 0000-0002-5300-3075
+    affiliation: Master of Statistics and Data Science @ Hasselt University
+    affiliation-url: https://ucsb-meds.github.io/ 
+date: 2026-01-15
+categories: [biostatistics,survey design] # self-defined categories
+# include-after-body: pub_ready_viz.html
+citation: 
+  url: https://bokola.github.io/posts/2026-01-15-survey-design/ 
+
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+# bibliography: reference.bib
+---
+
+
+# Analysis
+
+```{r}
+#| include: false
+pacman::p_load(
+  "tidyverse", "srvyr", "survey", "pak", "broom", "gt", "gtsummary",
+  "censusapi", "skimr", "prettyunits"
+)
+pak::pak("tidy-survey-r/srvyrexploR")
+```
+
+## Data
+
+Provided by `{srvyrexploR}` library. The first is America's elections data.
+
+```{r}
+data('anes_2020', package = "srvyrexploR")
+anes_2020 %>% select(-matches("^V\\d")) %>%# starts with V followed by a digit
+glimpse()
+```
+
+```{r}
+anes_2020 %>% select(-matches("^V\\d")) %>% skimr::skim()
+```
+
+Residential energy consumption survey
+
+```{r}
+data("recs_2020", package = "srvyrexploR")
+recs_2020 %>% 
+  select(-matches("^NWEIGHT")) %>% skim()
+```
+
+Numeric vars
+
+```{r}
+recs_2020 %>% select(where(is.numeric)) %>% colnames()
+```
+
+American national election studies design object
+
+```{r}
+cps_state_in <- getCensus(
+  name = "cps/basic/mar",
+  vintage = 2020,
+  region = "state",
+  vars = c(
+    "HRMONTH", "HRYEAR4",
+    "PRTAGE", "PRCITSHP", "PWSSWGT"
+  ),
+  key = Sys.getenv("CENSUS_KEY")
+)
+
+cps_state <- cps_state_in %>%
+  as_tibble() %>%
+  mutate(
+    across(
+      .cols = everything(),
+      .fns = as.numeric
+    )
+  )
+```
+
+
+```{r}
+cps_narrow_resp <- cps_state %>%
+  filter(
+    PRTAGE >= 18,
+    PRCITSHP %in% c(1:4)
+  )
+```
+
+Calculate use population from the narrow data. Weights should add to total pop.
+
+```{r}
+targetpop <- cps_narrow_resp %>% 
+  pull(PWSSWGT) %>%
+  sum()
+scales::comma(targetpop)
+```
+
+We can the weight the us election study appropriately
+
+```{r}
+anes_adjwgt <- anes_2020 %>%
+  mutate(
+    weight = V200010b / sum(V200010b) * targetpop
+  )
+```
+
+We then make it conform to a survey design
+
+```{r}
+anes_des <- anes_adjwgt %>%
+  as_survey_design(
+    weights = weight,
+    strata = V200010d,
+    ids = V200010c,
+    nest = TRUE
+  )
+anes_des
+```
+
+Using replicated weights
+
+```{r}
+recs_des <- recs_2020 %>%
+  as_survey_rep(
+    weights = NWEIGHT,
+    repweights = NWEIGHT1:NWEIGHT60,
+    type = "JK1",
+    scale = 59 / 60,
+    mse = TRUE
+  )
+
+recs_des
+```
+
+## Descriptive statisitcs
+
+* Count observations with `survey_count()` or `survey_tally()`
+* Sum variables with `survey_total()`
+* Means and proportions: `survey_mean()`, `survey_prop()`
+* Quantiles and medians: `survey_quantile()`, `survey_median()`
+* Correlations: `survey_cor()`
+* Ratios: `survey_ratio()`
+* Variances and standard deviation: `survey_var()`, `survey_sd()`
+
+### Counts and cross-tabulations
+
+```{r}
+recs_des %>% survey_tally()
+```
+
+Estimated counts by subgroups
+
+```{r}
+recs_des %>% survey_count(Region, Division, name = "N")
+```
+
+To achieve same result by `survey_tally()`, you first group
+
+```{r}
+recs_des %>% group_by(Region, Division) %>% survey_tally(name = "N")
+```
+
+### Totals and sums
+
+To get population count estimate, we leave argument `x`, empty.
+
+```{r}
+recs_des %>% 
+  summarize(
+    tot = survey_total()
+  )
+```
+
+Overall summation of a continuous variable
+
+```{r}
+recs_des %>%
+  summarize(elec_bill = survey_total(DOLLAREL))
+```
+
+Summation by groups
+
+```{r}
+recs_des %>% group_by(Region) %>%
+  summarize(
+  elec_bill = survey_total(DOLLAREL, vartype = "ci")
+  
+)
+```
+
+You can supply `.by` argument inside `summarize`
+
+```{r}
+recs_des  %>%
+  summarize(
+  elec_bill = survey_total(DOLLAREL, vartype = "ci"),
+  .by = Region
+)
+```
+
+### Means and proportions
+
+```{r}
+recs_des %>% group_by(Region, ACUsed) %>%
+  summarise(
+  p = survey_prop()
+)
+```
+
+Joint proportions using `interact`
+
+```{r}
+recs_des %>% 
+  group_by(
+    interact(Region, ACUsed)
+  ) %>% 
+  summarize(
+    p = survey_prop() 
+  ) %>% mutate(
+    p = scales::percent(p)
+  )
+```
+
+Overall mean
+
+```{r}
+recs_des %>% summarize(
+  elec_bill = survey_mean(DOLLAREL, vartype = c("se", "ci"))
+)
+```
+
+### Quantiles and Medians
+
+Overall quantiles
+
+```{r}
+recs_des %>%
+  summarize(
+    elec_bill = survey_quantile(DOLLAREL, quantiles = c(.25, .5, .75))
+  )
+```
+
+Overall median
+
+```{r}
+recs_des %>%
+  summarize(
+    elec_bill = survey_median(DOLLAREL)
+  )
+```
+
+Correlations
+
+```{r}
+recs_des %>%
+  summarize(SQFT_Elec_Corr = survey_corr(TOTSQFT_EN, BTUEL))
+```
+
+#### Design effects
+
+Design effect measures the precision of an estimate under a particular sampling
+design relative to a simple random sampling design. If <1, the design is 
+statistically more efficient than SRS. It is used in the calculation of 
+effective sample size - the sample size needed if we were to employ SRS
+
+$$n_{eff} = \frac{n}{D_{eff}}$$
+
+```{r}
+recs_des %>%
+  summarize(
+    across(
+          c(BTUEL, BTUNG, BTULP, BTUFO, BTUWOOD),
+          ~ survey_mean(.x, deff = TRUE, vartype = NULL)
+    )
+  ) %>% select(ends_with("deff"))
+```
+
+#### Creating cascading rows - `cascade`
+
+```{r}
+recs_des %>%
+  cascade(DOLLAREL_mn = survey_mean(DOLLAREL))
+```
+
+Group
+
+```{r}
+recs_des %>%
+  group_by(Region) %>%
+  cascade(DOLLAREL_mn = survey_mean(DOLLAREL), .fill = "National")
+```
+
+Or through a long dplyr pipeline
+
+```{r}
+recs_des %>% 
+  summarize(
+    cons_mean = survey_mean(DOLLAREL),
+    .by = Region
+  ) %>% bind_rows(
+    ., recs_des %>%
+      summarize(
+        cons_mean = survey_mean(DOLLAREL)
+      ) %>% mutate(
+        ., Region = "National"
+      ) %>% select(Region, everything())
+  )
+```
+
+#### Summarize across multiple variables
+
+```{r}
+recs_des %>% 
+  summarize(
+    across(
+      starts_with("BTU"),
+      list(
+        Total = ~ survey_total(.x, vartype = "cv"),
+        Mean = ~ survey_mean(.x, vartype = "cv")
+      ),
+      .unpack = "{outer}.{inner}"
+    )
+  )
+```
+
+#### Map
+
+```{r}
+calc <- function(df, var) {
+  df %>%
+    drop_na(!!sym(var)) %>%
+    group_by(!!sym(var)) %>%
+    summarize(p = survey_prop()) %>%
+    mutate(Variable = var) %>%
+    rename(Answer := !!sym(var)) %>%
+    mutate(p = scales::percent(p)) %>%
+    select(Variable, everything())
+}
+
+v <- c("TrustGovernment", "TrustPeople")
+map2(
+  .x = list(anes_des),
+  .y = v,
+  .f = ~calc(df = .x, var = .y)
+) %>% bind_rows()
+```
+
+## Statistical testing
+
+* Comparison of means and proportions: `svyttest()`
+* goodness-of-fit test: `svygofchisq()`
+* Test of independence: `svychisq()`
+* Test of homogeneity: `svychisq()`
+
+### Comparison of Means and Proportions
+
+* one-sample t-test: compare to 0 - `var ~ 0` or to a different value `var - val = 0`
+* two-sample t-test: 
+    
+    * unpaired: two level grouping variable - `var ~ groupvar` or three level
+    grouping variable - `var ~ groupvar == level`
+    * paired: `var_1 - var_2 = 0`
+  
+Example: one-sample t-test for mean
+
+```{r}
+recs_des %>%
+  svyttest(
+    formula = SummerTempNight - 68 ~ 0,
+    design =.,
+    na.rm = TRUE
+  )
+```
+
+get mean summer temps at night
+
+```{r}
+recs_des %>% 
+  summarize(m = survey_mean(SummerTempNight, na.rm = TRUE))
+```
+
+Example: one-sample t-test for proportion
+
+```{r}
+recs_des %>% summarize(
+  p = survey_prop(),
+  .by = ACUsed
+)
+```
+
+```{r}
+#| label: tbl-ac
+#| tbl-cap: "One-sample t-test for estimate of US housholds use of A/C in their homes differing from 90%"
+recs_des %>%
+  svyttest(
+    formula = (ACUsed == TRUE) - 0.90 ~ 0,
+    design = .,
+    na.rm = TRUE
+  ) %>% tidy() %>%
+  mutate(p.value = pretty_p_value(p.value)) %>%
+  gt() %>%
+  fmt_number()
+```
+
+Example: paired two-sample t-test
+
+```{r}
+#| label: tbl-tmp
+#| tbl-cap: "Paired two-sample t-test"
+recs_des %>%
+  svyttest(
+    formula = SummerTempNight - WinterTempNight ~ 0,
+    design = .,
+    na.rm = TRUE
+  ) %>% tidy() %>%
+  mutate(
+    p.value = pretty_p_value(p.value)
+  ) %>%
+  gt() %>%
+  fmt_number()
+```
+
+
+### Chi-squared tests
+
+See <https://tidy-survey-r.github.io/tidy-survey-book/c06-statistical-testing.html>
+
+Example: goodness of fit test
+
+```{r}
+anes_des_educ <- anes_des %>%
+  mutate(
+    Education2 = fct_collapse(Education,
+      "Bachelor or Higher" = c("Bachelor's", "Graduate")
+    )
+  )
+
+anes_des_educ %>%
+  drop_na(Education2) %>%
+  group_by(Education2) %>% 
+  summarize(p = survey_mean())
+```
+
+
+```{r}
+anes_des_educ %>%
+  svygofchisq(
+    formula = ~Education2,
+    design = .,
+    p = c(0.11, 0.27, 0.28, 0.35),
+    na.rm = TRUE
+  ) %>% tidy()
+```
+
+
+```{r}
+ex1_table <- anes_des_educ %>%
+  drop_na(Education2) %>%
+  group_by(Education2) %>%
+  summarize(Observed = survey_mean(vartype = "ci")) %>%
+  rename(Education = Education2) %>%
+  mutate(Expected = c(0.11, 0.27, 0.29, 0.33)) %>%
+  select(Education, Expected, everything())
+
+ex1_table
+```
+
+```{r}
+ex1_table %>%
+  pivot_longer(
+    cols = c("Expected", "Observed"),
+    names_to = "Names",
+    values_to = "Proportion"
+  ) %>%
+  mutate(
+    Observed_low = if_else(Names == "Observed", Observed_low, NA_real_),
+    Observed_upp = if_else(Names == "Observed", Observed_upp, NA_real_),
+    Names = if_else(Names == "Observed",
+      "ANES (observed)", "ACS (expected)"
+    )
+  ) %>%
+  ggplot(aes(x = Education, y = Proportion, color = Names)) +
+  geom_point(alpha = 0.75, size = 2) +
+  geom_errorbar(aes(ymin = Observed_low, ymax = Observed_upp),
+    width = 0.25
+  ) +
+  theme_bw() +
+  # scale_color_manual(name = "Type", values = book_colors[c(4, 1)]) +
+  theme(legend.position = "bottom", legend.title = element_blank())
+```
+
+
+# Sampling Designs and replicate weights
+
+### SRS 
+
+#### SRS without replacement
+
+When we sample without replacement, we use finite population correction in the 
+estimation of standard error of estimates
+
+$$fpc = \sqrt{\frac{N-n}{N-1}} \simeq \sqrt{1 - \frac{n}{N}}$$
+
+```{r}
+set.seed(as.numeric(Sys.time()))
+
+data("api", package = "survey")
+
+apisrs_slim <-
+  apisrs %>%
+  as_tibble() %>%
+  arrange(dnum, snum) %>%
+  select(cds, dnum, snum, dname, sname, fpc, pw)
+
+apisrs_slim
+```
+
+Create a `tbl_survey` object
+
+```{r}
+apisrs_des <- apisrs_slim %>%
+  as_survey_design(
+    weights = pw,
+    fpc = fpc
+  )
+apisrs_des
+```
+
+### SRS with replacement
+
+```{r}
+set.seed(as.numeric(Sys.time()))
+
+apisrswr <- apipop %>%
+  as_tibble() %>%
+  slice_sample(n = 200, replace = TRUE) %>%
+  select(cds, dnum, snum, dname, sname) %>%
+  mutate(weight = nrow(apipop) / 200)
+
+head(apisrswr)
+```
+
+## Statified Sampling
+
+Population can be grouped into homogeneous units (strata). Random samples are then drawn
+from each of the units.
+
+If $\hat{y}_h$ is the sample mean for stratum $h$, $N_h$ the population size of 
+stratum $h$, and $H$ the total number of strata, then estimates of the mean
+
+$$\hat{y} = \frac{1}{N}\sum_{h=1}^H N_h \hat{y}_h$$ 
+and 
+
+$$se(\hat{y}) = \sqrt{\frac{1}{N^2}\sum_{h=1}^H N^2_h \frac{s^2_h}{n_h}(1 - \frac{n_h}{N_h})}$$
+where
+
+$$s^2_h = \frac{1}{n_h - 1} \sum_{i=1}^{n_h}(y_{i,h} - \hat{y_h})^2$$
+and proportion
+
+$$\hat{p} = \frac{1}{N} \sum_{h=1}^H N_h \hat{p}_h$$
+
+$$se(\hat{p}) = \frac{1}{N}\sqrt{\sum_{h=1}^H N^2_h\frac{\hat{p_h}(1- \hat{p_h})}{n_h - 1}(1 - \frac{n_h}{N_h})}$$
+
+## Clustered sampling
+
+Applies if a population can be divided into mutually exclusive subgroups (clusters 
+or primary sampling units (PSU)).A random selection of PSUs is sampled followed 
+by another level of sampling within the chosen clusters. Suppose $a$ clusters 
+are sampled from a population of A clusters via SRS. Within each sampled cluster
+$i$ there are $B_i$ units in the population of which $b_i$ units are sampled using
+SRS. if $\hat{y}_i$ is the $i$th cluster mean, then the population mean is 
+estimated by
+
+$$\hat{y} = \frac{\sum_{i=1}^aB_i\hat{y_i}}{\sum_{i=1}^a B_i}$$
+
+$$se(\hat{y}) = \frac{1}{\hat{N}}\sqrt{(1 - \frac{a}{A})\frac{s^2_a}{a} + \frac{A}{a}\sum_{i=1}^a(1 - \frac{b_i}{B_i}) \frac{s_i^2}{b_i}}$$
+where $\hat{N}$ is the estimated population size, $s^2_a$ is the between-cluster
+variance, and $s^2_i$ is the within-cluster variance.
+
+Between-cluster variance $s^2_a$ is:
+
+$$s_a^2 = \frac{1}{a - 1} \sum_{i = 1}^a (\hat{y_i} - \frac{\sum_{i=1}^a \hat{y_i}}{a})^2$$
+where $\frac{\sum_{i=1}^a \hat{y_i}}{a} = \bar{y}$ is the grand mean.
+
+The within-cluster variance ($s^2_i$) is estimated through
+
+$$s^2_i = \frac{1}{a(b_i - 1)} \sum_{j = 1}^{b_i}(y_{ij} - \hat{y_i})$$
+where $y_{ij}$ is the outcome for sampled unit $j$ from cluster $i$
+
