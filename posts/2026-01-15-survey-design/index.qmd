@@ -14,9 +14,9 @@ citation:
   url: https://bokola.github.io/posts/2026-01-15-survey-design/ 
 
 draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+code-fold: true
 # bibliography: reference.bib
 ---
-
 
 # Analysis
 
@@ -81,7 +81,6 @@ cps_state <- cps_state_in %>%
   )
 ```
 
-
 ```{r}
 cps_narrow_resp <- cps_state %>%
   filter(
@@ -138,13 +137,13 @@ recs_des
 
 ## Descriptive statisitcs
 
-* Count observations with `survey_count()` or `survey_tally()`
-* Sum variables with `survey_total()`
-* Means and proportions: `survey_mean()`, `survey_prop()`
-* Quantiles and medians: `survey_quantile()`, `survey_median()`
-* Correlations: `survey_cor()`
-* Ratios: `survey_ratio()`
-* Variances and standard deviation: `survey_var()`, `survey_sd()`
+-   Count observations with `survey_count()` or `survey_tally()`
+-   Sum variables with `survey_total()`
+-   Means and proportions: `survey_mean()`, `survey_prop()`
+-   Quantiles and medians: `survey_quantile()`, `survey_median()`
+-   Correlations: `survey_cor()`
+-   Ratios: `survey_ratio()`
+-   Variances and standard deviation: `survey_var()`, `survey_sd()`
 
 ### Counts and cross-tabulations
 
@@ -262,10 +261,7 @@ recs_des %>%
 
 #### Design effects
 
-Design effect measures the precision of an estimate under a particular sampling
-design relative to a simple random sampling design. If <1, the design is 
-statistically more efficient than SRS. It is used in the calculation of 
-effective sample size - the sample size needed if we were to employ SRS
+Design effect measures the precision of an estimate under a particular sampling design relative to a simple random sampling design. If \<1, the design is statistically more efficient than SRS. It is used in the calculation of effective sample size - the sample size needed if we were to employ SRS
 
 $$n_{eff} = \frac{n}{D_{eff}}$$
 
@@ -351,20 +347,20 @@ map2(
 
 ## Statistical testing
 
-* Comparison of means and proportions: `svyttest()`
-* goodness-of-fit test: `svygofchisq()`
-* Test of independence: `svychisq()`
-* Test of homogeneity: `svychisq()`
+-   Comparison of means and proportions: `svyttest()`
+-   goodness-of-fit test: `svygofchisq()`
+-   Test of independence: `svychisq()`
+-   Test of homogeneity: `svychisq()`
 
 ### Comparison of Means and Proportions
 
-* one-sample t-test: compare to 0 - `var ~ 0` or to a different value `var - val = 0`
-* two-sample t-test: 
-    
-    * unpaired: two level grouping variable - `var ~ groupvar` or three level
-    grouping variable - `var ~ groupvar == level`
-    * paired: `var_1 - var_2 = 0`
-  
+-   one-sample t-test: compare to 0 - `var ~ 0` or to a different value `var - val = 0`
+
+-   two-sample t-test:
+
+    -   unpaired: two level grouping variable - `var ~ groupvar` or three level grouping variable - `var ~ groupvar == level`
+    -   paired: `var_1 - var_2 = 0`
+
 Example: one-sample t-test for mean
 
 ```{r}
@@ -424,7 +420,6 @@ recs_des %>%
   fmt_number()
 ```
 
-
 ### Chi-squared tests
 
 See <https://tidy-survey-r.github.io/tidy-survey-book/c06-statistical-testing.html>
@@ -445,7 +440,6 @@ anes_des_educ %>%
   summarize(p = survey_mean())
 ```
 
-
 ```{r}
 anes_des_educ %>%
   svygofchisq(
@@ -455,7 +449,6 @@ anes_des_educ %>%
     na.rm = TRUE
   ) %>% tidy()
 ```
-
 
 ```{r}
 ex1_table <- anes_des_educ %>%
@@ -493,15 +486,13 @@ ex1_table %>%
   theme(legend.position = "bottom", legend.title = element_blank())
 ```
 
-
 # Sampling Designs and replicate weights
 
-### SRS 
+### SRS
 
 #### SRS without replacement
 
-When we sample without replacement, we use finite population correction in the 
-estimation of standard error of estimates
+When we sample without replacement, we use finite population correction in the estimation of standard error of estimates
 
 $$fpc = \sqrt{\frac{N-n}{N-1}} \simeq \sqrt{1 - \frac{n}{N}}$$
 
@@ -546,20 +537,15 @@ head(apisrswr)
 
 ## Statified Sampling
 
-Population can be grouped into homogeneous units (strata). Random samples are then drawn
-from each of the units.
+Population can be grouped into homogeneous units (strata). Random samples are then drawn from each of the units.
 
-If $\hat{y}_h$ is the sample mean for stratum $h$, $N_h$ the population size of 
-stratum $h$, and $H$ the total number of strata, then estimates of the mean
+If $\hat{y}_h$ is the sample mean for stratum $h$, $N_h$ the population size of stratum $h$, and $H$ the total number of strata, then estimates of the mean
 
-$$\hat{y} = \frac{1}{N}\sum_{h=1}^H N_h \hat{y}_h$$ 
-and 
+$$\hat{y} = \frac{1}{N}\sum_{h=1}^H N_h \hat{y}_h$$ and
 
-$$se(\hat{y}) = \sqrt{\frac{1}{N^2}\sum_{h=1}^H N^2_h \frac{s^2_h}{n_h}(1 - \frac{n_h}{N_h})}$$
-where
+$$se(\hat{y}) = \sqrt{\frac{1}{N^2}\sum_{h=1}^H N^2_h \frac{s^2_h}{n_h}(1 - \frac{n_h}{N_h})}$$ where
 
-$$s^2_h = \frac{1}{n_h - 1} \sum_{i=1}^{n_h}(y_{i,h} - \hat{y_h})^2$$
-and proportion
+$$s^2_h = \frac{1}{n_h - 1} \sum_{i=1}^{n_h}(y_{i,h} - \hat{y_h})^2$$ and proportion
 
 $$\hat{p} = \frac{1}{N} \sum_{h=1}^H N_h \hat{p}_h$$
 
@@ -567,27 +553,16 @@ $$se(\hat{p}) = \frac{1}{N}\sqrt{\sum_{h=1}^H N^2_h\frac{\hat{p_h}(1- \hat{p_h})
 
 ## Clustered sampling
 
-Applies if a population can be divided into mutually exclusive subgroups (clusters 
-or primary sampling units (PSU)).A random selection of PSUs is sampled followed 
-by another level of sampling within the chosen clusters. Suppose $a$ clusters 
-are sampled from a population of A clusters via SRS. Within each sampled cluster
-$i$ there are $B_i$ units in the population of which $b_i$ units are sampled using
-SRS. if $\hat{y}_i$ is the $i$th cluster mean, then the population mean is 
-estimated by
+Applies if a population can be divided into mutually exclusive subgroups (clusters or primary sampling units (PSU)).A random selection of PSUs is sampled followed by another level of sampling within the chosen clusters. Suppose $a$ clusters are sampled from a population of A clusters via SRS. Within each sampled cluster $i$ there are $B_i$ units in the population of which $b_i$ units are sampled using SRS. if $\hat{y}_i$ is the $i$th cluster mean, then the population mean is estimated by
 
 $$\hat{y} = \frac{\sum_{i=1}^aB_i\hat{y_i}}{\sum_{i=1}^a B_i}$$
 
-$$se(\hat{y}) = \frac{1}{\hat{N}}\sqrt{(1 - \frac{a}{A})\frac{s^2_a}{a} + \frac{A}{a}\sum_{i=1}^a(1 - \frac{b_i}{B_i}) \frac{s_i^2}{b_i}}$$
-where $\hat{N}$ is the estimated population size, $s^2_a$ is the between-cluster
-variance, and $s^2_i$ is the within-cluster variance.
+$$se(\hat{y}) = \frac{1}{\hat{N}}\sqrt{(1 - \frac{a}{A})\frac{s^2_a}{a} + \frac{A}{a}\sum_{i=1}^a(1 - \frac{b_i}{B_i}) \frac{s_i^2}{b_i}}$$ where $\hat{N}$ is the estimated population size, $s^2_a$ is the between-cluster variance, and $s^2_i$ is the within-cluster variance.
 
 Between-cluster variance $s^2_a$ is:
 
-$$s_a^2 = \frac{1}{a - 1} \sum_{i = 1}^a (\hat{y_i} - \frac{\sum_{i=1}^a \hat{y_i}}{a})^2$$
-where $\frac{\sum_{i=1}^a \hat{y_i}}{a} = \bar{y}$ is the grand mean.
+$$s_a^2 = \frac{1}{a - 1} \sum_{i = 1}^a (\hat{y_i} - \frac{\sum_{i=1}^a \hat{y_i}}{a})^2$$ where $\frac{\sum_{i=1}^a \hat{y_i}}{a} = \bar{y}$ is the grand mean.
 
 The within-cluster variance ($s^2_i$) is estimated through
 
-$$s^2_i = \frac{1}{a(b_i - 1)} \sum_{j = 1}^{b_i}(y_{ij} - \hat{y_i})$$
-where $y_{ij}$ is the outcome for sampled unit $j$ from cluster $i$
-
+$$s^2_i = \frac{1}{a(b_i - 1)} \sum_{j = 1}^{b_i}(y_{ij} - \hat{y_i})$$ where $y_{ij}$ is the outcome for sampled unit $j$ from cluster $i$

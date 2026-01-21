@@ -1,0 +1,1314 @@
+---
+title: "Econometrics: R introduction"
+description: ""
+author:
+  - name: Basil Okola
+    url: https://bokola.github.io/
+    # orcid: 0000-0002-5300-3075
+    affiliation: Master of Statistics and Data Science @ Hasselt University
+    affiliation-url: https://ucsb-meds.github.io/ 
+date: 2026-01-21
+categories: [econometrics, instrumental variables, quasi-experiments, RCTs,R] # self-defined categories
+# include-after-body: pub_ready_viz.html
+citation: 
+  url: https://bokola.github.io/posts/2026-01-15-survey-design/ 
+
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+code-fold: true
+# bibliography: reference.bib
+---
+
+
+# Multiple Regression
+
+A number of assumptions underlying ordinary least square (OLS) regression come 
+into close scrutiny under multiple linear regressions. Key assumptions include
+**linearity, independence of residuals, homoscedasticity, normality of residuals**.
+
+```{r libs}
+pacman::p_load(
+  AER, tidyverse, mvtnorm, flextable, modelsummary, sandwich, stargazer,
+  MASS, rddtools, scales, broom, prettyunits
+)
+data("CASchools", package = "AER")
+
+#' Render model coefficients as a flextable
+#'
+#' @param x model object
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+render_summary <- function(x){
+  x %>% broom::tidy() %>%
+    mutate(p.value = prettyunits::pretty_p_value(p.value)) %>%
+    mutate(across(where(is.numeric), ~ round(., 3))) %>%
+    flextable::flextable()
+}
+
+#' Render a list of models as flextable
+#'
+#' @param models list object of models
+#' @param robust_se list object of robust standard errors
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+model_tables <- function(models, robust_se) {
+  modelsummary(
+    models,
+    vcov = robust_se,
+    # Applies your robust SEs
+    output = "flextable",
+    # Outputs as a flextable object
+    fmt = 3,
+    # 3 decimal places
+    stars = TRUE,
+    # Significance stars (optional)
+    # gof_map = gm1 # Clean up GOF statistics
+    coef_omit = "^\\(Intercept\\)$"
+    ,
+    gof_omit = NULL
+  ) |>
+    autofit() |>
+    theme_vanilla()   %>%         # Clean academic style
+    # This command removes any remaining horizontal lines inside the body
+    border_inner_h(part = "body", border = officer::fp_border(width = 0))
+}
+```
+
+```{r}
+#| label: fig-ols
+#| fig-cap: "OLS assumptions visual diagnostic"
+#|fig-height: 18
+m <- lm(math ~ expenditure, data = CASchools)
+
+par(mfrow = c(2, 2))
+plot(m, col = "steelblue", pch = 20)
+par(mfrow = c(1, 1))
+```
+* A plot of residuals vs. fitted values assesses linearity and homoscedasticity assumption. 
+A random (white noise) scatter around 0 suggests the assumptions are met.
+* A normal quantile-quantile (Q-Q) plot assesses the normality assumption of the residuals
+with departure from the straight line suggesting departure from normality.
+* A plot of standardized residuals against fitted values assesses homoscedasticity assumption.
+Look for white noise around the horizontal line in the scale location plot.
+* The residual vs. leverage plot assesses for influential outliers. Points far away from the 
+center are considered influential.
+
+A number of factors may make multiple OLS regression biased due to a violation
+of any of the assumptions underlying OLS. Sources of these biases include:
+
+**omitted variables, misspecification of the functional form, measurement errors,
+missing data and sample selection, simultaneous causality bias**.
+
+## omitted variables
+
+There is no easy fix for addressing omitted variables as a source of bias. Available guidelines stress
+
+1. specifying coefficient(s) of interest
+2. Identifying important sources of omitted variable bias using available 
+domain knowledge prior to model fitting so you end up with a a baseline model 
+specification and a questionable list of other regressors
+3. Using different model specification to test whether questionable regressors
+have effects different from zero
+4. Providing full disclosure of your results such as results of different model 
+specifications in support of your argument
+
+The other sources of bias can be assessed via simulations.
+
+## Misspecification of the functional form of a regression function
+
+Assume the underlying function is such that $Y_i = X_i^2$, but the model is
+specified in the form $Y_i = \beta_0 + \beta_1X_i + \epsilon_i$.
+
+```{r}
+#| label: fig-ms-lm
+#| fig-cap: "Model misspecification"
+set.seed(as.numeric(Sys.time()))
+
+X <- runif(100, -5, 5)
+Y <- X^2 + rnorm(100)
+
+ml <- lm(Y ~ X)
+
+plot(
+  X,
+  Y,
+  main = "Model misspecification",
+  pch = 20,
+  col = "steelblue"
+  
+)
+
+# add the regression line
+abline(
+  ml,
+  col = "grey",
+  lwd = 2, 
+  lty = 2
+)
+
+legend(
+  "bottomright",
+  bg = "transparent",
+  cex = 0.8,
+  lwd = 2,
+  lty = 2,
+  col = "grey",
+  legend = "OLS line"
+  
+)
+
+```
+
+## Measurement error and errors-in-variable bias
+
+Set in due to imprecise measurement of the independent variable and do not disappear
+not even with a large sample size. Due to imprecise measurements we observe 
+$\overset{\sim}{X}_i$ instead of $X_i$ the 
+model under consideration becomes 
+
+\begin{align*}
+  Y_i =& \, \beta_0 + \beta_1 \overset{\sim}{X}_i + \underbrace{\beta_1 (X_i - \overset{\sim}{X}_i) + u_i}_{=v_i}. \\
+  Y_i =& \, \beta_0 + \beta_1 \overset{\sim}{X}_i + v_i.
+\end{align*}
+
+where $\overset{\sim}{X}_i$ and the error term $v_i$ are correlated. The OLS would
+thus be biased and inconsistent for $B_1$ with the strength of bias dependent on the
+correlation between the observed regressor $\overset{\sim}{X}_i$ and the measurement error
+$w_i = X_i - \overset{\sim}{X}_i$.
+The classical measurement error model assumes that the measurement error, $w_i$, has zero mean and that it is uncorrelated with the variable, $X_i$, and the error term of the population regression model, $u_i$:
+
+\begin{equation}
+  \overset{\sim}{X}_i = X_i + w_i, \ \ \rho_{w_i,u_i}=0, \ \ \rho_{w_i,X_i}=0. 
+\end{equation}
+Then it holds that 
+$$\begin{equation}
+  \widehat{\beta}_1 \xrightarrow{p}{\frac{\sigma_{X}^2}{\sigma_{X}^2 + \sigma_{w}^2}} \beta_1, 
+\end{equation}
+$${\#eq-cmembias}
+which implies inconsistency as $\sigma_{X}^2, \sigma_{w}^2 > 0$ such that the fraction in (@eq-cmembias) is smaller than $1$. Note that there are two extreme cases: 
+
+1. If there is no measurement error, $\sigma_{w}^2=0$ such that $\widehat{\beta}_1 \xrightarrow{p}{\beta_1}$. 
+
+2. If $\sigma_{w}^2 \gg \sigma_{X}^2$ we have $\widehat{\beta}_1 \xrightarrow{p}{0}$. This is the case if the measurement error is so large that there essentially is no information on $X$ in the data that can be used to estimate $\beta_1$.
+
+The most obvious way to deal with errors-in-variables bias is to use an accurately measured $X$. If this is not possible, instrumental variables regression is an option. One might also deal with the issue by using a mathematical model of the measurement error and adjust the estimates appropriately: if it is plausible that the classical measurement error model applies and if there is information that can be used to estimate the ratio in equation (@eq-cmembias), one could compute an estimate that corrects for the downward bias.
+
+
+```{r}
+#| label: fig-me
+#| fig-cap: "Measurement error"
+dat <- data.frame(
+  rmvnorm(1000, c(50, 100), 
+          sigma = cbind(c(10, 5), c(5, 10))))
+
+# set columns names
+colnames(dat) <- c("X", "Y")
+
+# estimate the model (without measurement error)
+noerror_mod <- lm(Y ~ X, data = dat)
+
+# estimate the model (with measurement error in X)
+dat$X <- dat$X + rnorm(n = 1000, sd = sqrt(10))
+error_mod <- lm(Y ~ X, data = dat)
+
+# print estimated coefficients to console
+noerror_mod$coefficients
+#> (Intercept)           X 
+#>  76.3002047   0.4755264
+error_mod$coefficients
+#> (Intercept)           X 
+#>   87.276004    0.255212
+#>   
+# plot sample data
+plot(dat$X, dat$Y, 
+     pch = 20, 
+     col = "steelblue",
+     xlab = "X",
+     ylab = "Y")
+
+# add population regression function
+abline(coef = c(75, 0.5), 
+       col = "darkgreen",
+       lwd  = 1.5)
+
+# add estimated regression functions
+abline(noerror_mod, 
+       col = "purple",
+       lwd  = 1.5)
+
+abline(error_mod, 
+       col = "darkred",
+       lwd  = 1.5)
+
+# add legend
+legend("topleft",
+       bg = "transparent",
+       cex = 0.8,
+       lty = 1,
+       col = c("darkgreen", "purple", "darkred"), 
+       legend = c("Population", "No Errors", "Errors"))
+```
+
+## Missing data and sample selection
+
+If data is not missing at random, we are faced with biased estimates.
+
+```{r}
+#| label: fig-mis
+#| fig-cap: "Missing data bias"
+# randmly select 500 obs
+id <- sample(1:1000, 500)
+dat1 <- dat[-id,]
+dat2 <- dat[id,]
+
+ci_mod <- lm(Y ~ X, data = dat1)
+
+plot(
+  dat1$X,
+  dat1$Y,
+  col = "steelblue",
+  pch = 20,
+  cex = 0.8,
+  xlab = "X",
+  ylab = "Y"
+)
+
+points(
+  dat2$X,
+  dat2$Y,
+  cex = 0.8,
+  col = "grey",
+  pch = 20
+)
+
+# add pop reg function
+abline(
+  coef = c(75, 100),
+  col = "darkgreen",
+  lwd = 1.5
+)
+
+# add full sample model
+abline(noerror_mod, col = "black")
+
+# add model without a sample of 500
+abline(ci_mod, col = "purple")
+
+legend(
+  "bottomright",
+  lty = 2,
+  bg = "transparent",
+  cex = 0.8,
+  col = c("darkgreen", "black", "purple"),
+  legend = c("population", "full sample", "random sample of 500")
+)
+```
+
+## Simultaneous causality bias
+
+Arises when `Y` influences `X`. Let's assume that we are interested in estimating the
+effect of 20% increase in price on cigarette. We get the log of price and use it to
+model consumption, giving a price elasticity of consumption interpretation. Since
+it is not demand on the Y-axis, this not an estimate of the demand curve, and is 
+therefore a classic example of reverse (simultaneous) causality.
+
+```{r}
+#| label: fig-revc
+#| fig-cap: "Reverse causlaity bias"
+data("CigarettesSW")
+c1995 <- subset(CigarettesSW, year == "1995")
+
+# estimate the model
+cigcon_mod <- lm(log(packs) ~ log(price), data = c1995)
+cigcon_mod
+
+# plot the estimated regression line and the data
+plot(log(c1995$price), log(c1995$packs),
+     xlab = "ln(Price)",
+     ylab = "ln(Consumption)",
+     main = "Demand for Cigarettes",
+     pch = 20,
+     col = "steelblue")
+
+abline(cigcon_mod, 
+       col = "darkred", 
+       lwd = 1.5)
+# add legend
+legend("topright",lty=1,col= "darkred", "Estimated Regression Line")
+```
+
+# Instrumental variable regression
+
+## Simple instrumental variable regression
+
+Instrumental variables (IV) can be used to address possible omitted variable bias.
+Considering a simple regression model 
+
+$$
+\begin{equation}
+Y_i = \beta_0 + \beta_1X_i + \epsilon_i, i = 1, \ldots, n
+\end{equation}
+$${\#eq-lm}
+
+in which the error term is correlated with the endogenous regressor $X$ making the OLS estimate
+inconsistent for $\beta_1$, we can use a single IV variable $Z$ to obtain a 
+consistent estimator for $\beta_1$. The IV variable has to meet the 
+
+
+1. **relevance condition**: $X$ and its instrument $Z$ must be correlated
+$\rho_{Z_i, X_i} \ne 0$ or multicollinear for multiple IV regression.
+2. **instrument exogeneity condition**: The instrument $Z$ must not be 
+correlated with the error term. 
+$\rho_{Z_i, \epsilon_i} = 0$
+
+Estimation is through a two-stage least square (TSLS) estimation. The first stage
+condenses the variation in the endogenous variable $X$ into a problem-free part 
+that is explained by the IV variable $Z$, and a problematic component that is 
+correlated to the error term $\epsilon_i$. In the second stage the problem-free
+component of the variation in $X$ is used to estimate $\beta_1$.
+
+The first stage uses the regression model $X_i = \pi_0 + \pi_1Z_i + v_i$, where 
+$\pi_0 + \pi_1Z_i$ is the component of $X_i$ explained by $Z_i$, and $v_i$ is the 
+component that can not be explained by $Z_i$ and is correlated with $\epsilon_i$.
+We can use OLS estimates $\hat{\pi_0}$ and $\hat{\pi_1}$ to predict $X_i$ giving 
+problem-free $\hat{X_i}$ ($\hat{X_i}$ exogenous in the regression of Y on $\hat{X}$
+done on second stage ) if $Z$ is indeed a valid instrument. The second stage 
+produces $\hat{\beta}_0^{TSLS}$, and $\hat{\beta}_1^{TSLS}$, which are the TSLS 
+estimates of $\beta_0$ and $\beta_1$ respectively. For a single IV it can be shown 
+that the TSLS estimator is but the ratio of sample covariance between $Z$ and $Y$
+
+$$
+\begin{equation}
+\hat{\beta}^{TSLS} = \frac{s_{Z, Y}}{s_{Z, X}} = \frac{\frac{1}{n-1} \sum_{i=1}^n (Y_i - \bar{Y})(Z_i - \bar{Z})}{\frac{1}{n-1}\sum_{i=1}^n (X_i - \bar{X}) (Z_i - \bar{Z})}
+\end{equation}
+$${\#eq-tsls}
+
+### Example: Demand for cigarettes
+
+```{r}
+skimr::skim(CigarettesSW)
+```
+
+We wish to estimate $\beta_1$ in 
+
+$$
+\begin{equation}
+log(Q_i) = \beta_0 + \beta_1 log(P_i) + \epsilon_i
+\end{equation}
+$${\#eq-tcigar}
+
+
+where $Q_i$ is the number of cigarette packs per capita sold and $P_i$ is the 
+after tax average real price per pack of cigarette in state $i$. We use sales tax
+(dollars per pack) to instrument the endogenous regressor $log(P_i)$. Salestax is
+considered a relevant instrument as it is included in the after-tax average 
+price per pack.
+
+```{r}
+# compute real per capita prices
+CigarettesSW$rprice <- with(CigarettesSW, price / cpi)
+
+#  compute the sales tax
+CigarettesSW$salestax <- with(CigarettesSW, (taxs - tax) / cpi)
+
+# check the correlation between sales tax and price
+cor(CigarettesSW$salestax, CigarettesSW$price)
+#> [1] 0.6141228
+
+# generate a subset for the year 1995
+c1995 <- subset(CigarettesSW, year == "1995")
+```
+
+The first stage regression is $log(P_i) = \pi_0 + \pi_1SalesTax_i + v_i$. In the
+second stage we regress $log(Q_i)$ on $log(P_i)$ to obtain $\hat{\beta_0}^{TSLS}$
+$\hat{\beta_1}^{TSLS}$.
+
+```{r}
+# perform the first stage regression
+cig_s1 <- lm(log(rprice) ~ salestax, data = c1995)
+
+coeftest(cig_s1, vcov = vcovHC, type = "HC1") %>% broom::tidy() %>%
+  mutate(p.value = prettyunits::pretty_p_value(p.value)) %>% 
+  flextable::flextable()
+
+# store the fitted values from first stage
+lcigp_pred <- cig_s1$fitted.values
+
+```
+
+Run the second stage:
+
+```{r}
+cig_s2 <- lm(log(c1995$packs) ~ lcigp_pred)
+coeftest(cig_s2, vcov. = vcovHC) %>% broom::tidy() %>%
+  mutate(p.value = prettyunits::pretty_p_value(p.value)) %>%
+  flextable::flextable()
+
+```
+
+Thus estimating the model (@eq-tcigar) using TSLS yields 
+
+$$
+\begin{equation}
+  \widehat{\log(Q_i)} = \underset{(1.70)}{9.72} - \underset{(0.36)}{1.08} \log(P_i)
+\end{equation}
+$${\#eq-ecigstsls}
+
+where we write $\log(P_i)$ instead of $\widehat{\log(P_i)}$ for consistency. See
+`AER::ivreg()` for automatic IV regression.
+
+## The general IV regression model
+
+An extension of simple IV regression to multiple predictors: 
+
+$$
+\begin{equation}
+  Y_i = \beta_0 + \beta_1 X_{1i} + \dots + \beta_k X_{ki} + \beta_{k+1} W_{1i} + \dots + \beta_{k+r} W_{ri} + \epsilon_i, 
+\end{equation}
+$${\#eq-givmodel}
+
+with $i=1,\dots,n$ is the general instrumental variables regression model where
+
+- $Y_i$ is the dependent variable,
+
+- $\\beta_0,\dots,\beta_{k+1}$ are $1+k+r$ unknown regression coefficients,
+
+- $X_{1i},\dots,X_{ki}$ are $k$ endogenous regressors ,
+
+- $W_{1i},\dots,W_{ri}$ are $r$ exogenous regressors which are uncorrelated with $u_i$,
+
+- $\epsilon_i$ is the error term,
+
+- $Z_{1i},\dots,Z_{mi}$ are $m$ instrumental variables.
+
+The coefficients are overidentified if $m>k$. If $m<k$, the coefficients are underidentified and when $m=k$ they are exactly identified. For estimation of the IV regression model we require exact identification or overidentification. The computations can be autometed with `AER::ivreg()` function.
+
+Suppose we wish to estimate the model $Y_i = \beta_0 + \beta_1X_{1i} + \beta_2X_{2i} + W_{1i} + \epsilon_i$,
+where $X_{1i}$ and $X_{2i}$ are endogenous variables instrumented by $Z_{1i}$ and $Z_{2i}$ respectively, and $W_{1i}$ is an exogenous variable, a correct model specification involves listing all exogenous variables as
+instruments too by joining them with `+`s on the right of the vertical bar `|`:
+
+`y ~ X1 + X2 + W1 | W1 + Z1 + Z2`. A convenient way of specifying a model is
+updating a formula using `.` (which includes all variables except for the outcome).
+For instance, if we have one exogenous regressor $w1$
+and one endogenous regrossor $x1$ with instrument $z1$, the appropriate formula
+would be `y ~ w1 + x1 | w1 + z1` $=$ `y ~ w1 + x1 | . ~ x1 + z1`.
+
+Some assumptions underlying the IV regression are:
+
+1. $E(\epsilon_i|W_{1i}, \dots, W_{ri}) = 0$
+2. $(X_{1i}, \dots, X_{ki}, W_{1i}, \dots, W_{ri}, Z_{1i}, \dots, Z_{mi})$ are i.i.d draws from their joint distribution
+3. All variables have nonzero finite fourth moment, i.e., outliers are unlikely
+4. The $Z_s$ are valid instruments.
+
+### Example: Demands for cigarettes
+
+We update (@eq-tcigar) to include income:
+
+
+$$
+\begin{equation}
+log(Q_i) = \beta_0 + \beta_1 log(P_i) + \beta_2 log(income_i) +  \epsilon_i
+\end{equation}
+$${\#eq-ticigar}
+
+where income is defined as real per capita income.
+
+```{r}
+# add rincome to the dataset
+CigarettesSW$rincome <- with(CigarettesSW, income / population / cpi)
+
+c1995 <- subset(CigarettesSW, year == "1995")
+
+# estimate the model
+cig_ivreg2 <- ivreg(log(packs) ~ log(rprice) + log(rincome) | log(rincome) + 
+                    salestax, data = c1995)
+
+coeftest(cig_ivreg2, vcov = vcovHC, type = "HC1") %>%
+  broom::tidy() %>%
+  mutate(p.value = prettyunits::pretty_p_value(p.value)) %>%
+  flextable::flextable()
+
+
+```
+
+We obtain 
+
+$$
+\begin{equation}
+  \widehat{\log(Q_i)} = \underset{(1.26)}{9.43} - \underset{(0.37)}{1.14} \log(P_i) + \underset{(0.31)}{0.21} \log(income_i)
+\end{equation}
+$${\#eq-eicigstsls}
+
+
+Adding salestax as an IV:
+
+```{r}
+# add cigtax to the data set
+CigarettesSW$cigtax <- with(CigarettesSW, tax/cpi)
+
+c1995 <- subset(CigarettesSW, year == "1995")
+
+# estimate the model
+cig_ivreg3 <- ivreg(log(packs) ~ log(rprice) + log(rincome) | 
+                    log(rincome) + salestax + cigtax, data = c1995)
+
+coeftest(cig_ivreg3, vcov = vcovHC, type = "HC1") %>% 
+  broom::tidy() %>%
+  mutate(p.value = prettyunits::pretty_p_value(p.value)) %>%
+  flextable::flextable()
+
+```
+
+$$
+\begin{equation}
+  \widehat{\log(Q_i)} = \underset{(0.96)}{9.89} - \underset{(0.25)}{1.28} \log(P_i) + \underset{(0.25)}{0.28} \log(income_i)
+\end{equation}
+$${\#eq-eicigstsls-2}
+
+A question then arises on which estimates to trust. One could argue that the 
+estimates from (@eq-eicigstsls-2) are more trustworthy due to the lower standard
+errors compared to (@eq-eicigstsls). This is the subject considered under instrument 
+validity.
+
+## Checking instrument validity
+
+1. **Weak instrument**: To check for a weak instrument, compute the $F$-statistic
+corresponding to the hypothesis $H_0: Z_1 = \dots Z_m = 0$. A rule of thumb is
+that an $F$-statistic less than 10 imply weak instruments. If your instruments
+are weak, you can discard them and find better instruments or stick with them
+but find methods that improve TSLS.
+2. **Instrument exogeneity assumption is not met**: When we observe a correlation
+between an instrument and the error term, the IV regression is not consistent. 
+Overidentifying restriction test (J-test) is used to test that additional instruments
+are exogenous. It follows $\chi^2_{m -k}$ (under homoscedasticity), where $m$ is the number of instruments
+and $k$ the number of endogenous regressors. It involves regressing the error term
+on all instruments and endogenous variables:
+
+$$
+\begin{equation}
+\hat{\epsilon}^{TSLS} = \delta_0 + \delta_1Z_{1i} + \dots + \delta_mZ_{mi} +
+\delta_{m+1}W_{1i} + \dots + \delta_{m+r}W_{ri} + e_i
+\end{equation}
+$${\#eq-jstat}
+
+and testing whether all instruments are exogenous through the joint hypothesis
+$H_0: \delta_1 = 0, \dots, \delta_m = 0$, and computing the statistic $J = mF$.
+(see <https://www.econometrics-with-r.org/12.4-attdfc.html>)
+
+
+### Example: Demand for cigarettes
+
+We assess whether general sales tax and the cigarette-specific tax are valid
+instruments. It could be argued that tobacco growing states find economic importance
+in lower tobacco taxes and may lobby for them staying low. It may also be possible
+that tobacco growing states have higher rates of smoking than others, which would 
+lead to endogeneity of cigarette-specific taxes. This can only be solved by including
+data on the size of the tobacco and cigarette industry into the regression, which is
+not available in this case.
+
+It can be assumed that the role of tobacco and cigarette industry differs across
+states, but not across time. We can then exploit the panel structure of the data
+at two different time periods (1985, 1995) to estimate the *long-run elasticity*
+of the demand for cigarettes:
+
+$$
+\begin{equation}
+log(Q_{i, 1995}) - log(Q_{i, 1985}) = \beta_0 + \beta_1[log(P_{i, 1995}) -
+log(P_{i, 1985})] + \beta_2[log(income_{i, 1995}) - log(income_{i, 1985})] + \epsilon_i
+\end{equation}
+$${\#eq-elas}
+
+
+```{r}
+# subset data for year 1985
+c1985 <- subset(CigarettesSW, year == "1985")
+
+# define differences in variables
+packsdiff <- log(c1995$packs) - log(c1985$packs)
+
+pricediff <- log(c1995$price/c1995$cpi) - log(c1985$price/c1985$cpi)
+
+incomediff <- log(c1995$income/c1995$population/c1995$cpi) -
+log(c1985$income/c1985$population/c1985$cpi)
+
+salestaxdiff <- (c1995$taxs - c1995$tax)/c1995$cpi - 
+                                  (c1985$taxs - c1985$tax)/c1985$cpi
+
+cigtaxdiff <- c1995$tax/c1995$cpi - c1985$tax/c1985$cpi
+```
+
+We then perform 3 different IV estimations using `ivreg()`for differences between
+1985, 1995:
+
+1. TSLS using only the difference in sales taxes as the IV 
+2. TSLS using only difference in cigarette-specific taxes
+3. TSLS using both differences in sales taxes and cigarette-specific taxes
+
+```{r}
+# estimating the 3 models
+cig_ivreg_diff1 <- ivreg(
+  packsdiff ~ pricediff + incomediff | incomediff + salestaxdiff
+)
+
+cig_ivreg_diff2 <- cig_ivreg_diff1 <- ivreg(
+  packsdiff ~ pricediff + incomediff | incomediff + cigtaxdiff
+)
+
+cig_ivreg_diff3 <- cig_ivreg_diff1 <- ivreg(
+  packsdiff ~ pricediff + incomediff | incomediff + salestaxdiff + cigtaxdiff
+)
+```
+
+Sales tax as IV
+
+```{r}
+#| label: tbl-sltx
+#| tbl-cap: "Difference in sales tax as IV"
+
+coeftest(cig_ivreg_diff1, vcov. = vcovHC, type = "HC1") %>%
+  render_summary()
+
+```
+
+Cigarette-specific tax as IV
+
+```{r}
+#| label: tbl-cigtx
+#| tbl-cap: "Cigarette-specific tax as IV"
+
+coeftest(cig_ivreg_diff2, vcov. = vcovHC, type = "HC1") %>% 
+  render_summary()
+```
+
+Both sales tax and cigarette-specific tax as IV
+
+```{r}
+#| label: tbl-both
+#| tbl-cap: "Both sales tax and cigarette-specific tax as IV"
+
+coeftest(cig_ivreg_diff3, vcov. = vcovHC, type = "HC1") %>%
+  render_summary()
+```
+
+A tabulated summary
+
+```{r}
+#| label: tbl-iv-comparison
+#| tbl-cap: "Dependent Variable: 1985-1995 Difference in Log per Pack Price"
+#| message: false
+#| warning: false
+
+# 1. Define the models in a named list (this replaces column.labels)
+models <- list(
+  "IV: salestax" = cig_ivreg_diff1,
+  "IV: cigtax"   = cig_ivreg_diff2,
+  "IVs: salestax, cigtax" = cig_ivreg_diff3
+)
+
+# Define which Goodness-of-Fit stats to show and what to call them
+gm <- list(
+  list("raw" = "nobs", "clean" = "Observations", "fmt" = 0),
+  list("raw" = "r.squared", "clean" = "R2", "fmt" = 3),
+  list("raw" = "adj.r.squared", "clean" = "Adj. R2", "fmt" = 3)
+)
+
+# 2. Define standard errors
+# Note: modelsummary can calculate HC1 automatically, 
+# but since you already have 'rob_se', we can pass it directly.
+rob_se_list <- list(
+  sqrt(diag(vcovHC(cig_ivreg_diff1, type = "HC1"))),
+  sqrt(diag(vcovHC(cig_ivreg_diff2, type = "HC1"))),
+  sqrt(diag(vcovHC(cig_ivreg_diff3, type = "HC1")))
+)
+
+# 3. Generate the table
+modelsummary(
+  models,
+  vcov = rob_se_list,        # Applies your robust SEs
+  output = "flextable",      # Outputs as a flextable object
+  fmt = 3,                   # 3 decimal places
+  stars = TRUE,              # Significance stars (optional)
+  gof_map = gm # Clean up GOF statistics
+) |> 
+  autofit() |> 
+  theme_vanilla()   %>%         # Clean academic style
+# This command removes any remaining horizontal lines inside the body
+  border_inner_h(part = "body", border = officer::fp_border(width = 0))
+
+
+```
+
+We observe negative estimates for `pricediff` that differ when `cigtax` is used 
+as IV. We proceed to test the validity of the instruments by computing F-statistics
+for the first-stage regressions.
+
+```{r}
+#| label: tbl-ivrel
+#| tbl-cap: "Test IV relevance by an F-test. All the F-statistics are significantly different from zero"
+# first-stage regressions
+mod_relevance1 <- lm(pricediff ~ salestaxdiff + incomediff)
+mod_relevance2 <- lm(pricediff ~ cigtaxdiff + incomediff)
+mod_relevance3 <- lm(pricediff ~ incomediff + salestaxdiff + cigtaxdiff)
+
+# check instrument relevance
+
+mods <- list(mod_relevance1, mod_relevance2, mod_relevance3)
+names(mods) <- c("salestax", "cigartax", "both")
+hyp <- list("salestaxdiff = 0", "cigtaxdiff = 0", c("salestaxdiff = 0", "cigtaxdiff = 0"))
+
+iv_tests <- map2(
+  mods, hyp, \(m, h){
+    linearHypothesis(m, h, vcov. = vcovHC(m, type = "HC1"))
+  }
+) 
+
+ iv_tests |>
+  map_dfr(broom::tidy, .id = "model") %>% 
+   mutate(p.value = prettyunits::pretty_p_value(p.value)) %>%
+   mutate(
+     across(where(is.numeric), ~ round(., 3))
+   ) %>% 
+   flextable()
+
+```
+
+Next we conduct overidentifying restriction test for model with both sales tax and 
+cigatax as IV which is the only model where the coefficient on the difference in
+log prices is overidentified ($m = 2, k=1$) making it possible to compute the $J$
+statistic. To achive this, we regress the residuals from `cig_ivreg_diff3` on the
+IVs and the presumed exogenous regressor `incomediff`. We again test if the coefficients
+of the IV variables is zero, a condition necessary for exogenous variables.
+
+```{r}
+#| label: tbl-jtest
+#| tbl-cap: "J-test statitic testing for exogeneity condition of IVs"
+# compute the J-statistic
+cig_iv_OR <- lm(residuals(cig_ivreg_diff3) ~ incomediff + salestaxdiff + cigtaxdiff)
+
+cig_OR_test <- linearHypothesis(cig_iv_OR, 
+                               c("salestaxdiff = 0", "cigtaxdiff = 0"), 
+                               test = "Chisq")
+cig_OR_test %>% render_summary()
+
+```
+
+**Note**: The reported degrees of freedom is wrong, (2 instead of $m-k = 2-1=1$).
+The J-statistic is $\chi^2_1$ instead of $\chi^2_2$ as reported by the model.
+We calculate the correct p-value:
+
+```{r}
+pchisq(cig_OR_test[2, 5], df = 1, lower.tail = FALSE)
+```
+
+We reject the hypothesis that both instruments are exogenous at $\alpha = 0.05$
+and conclude that
+
+1. sales tax is an invalid instrument for the per-pack price,
+2. and so is the cigarette-specific tax,
+3. and that both instruments are invalid.
+
+# Experiments and Quasi-experiments
+
+Experiments give us the tools to conduct program evaluation interest being to 
+measure causal effects of programs. The gold-standard for this kind of work is 
+a randomized controlled experiment. In a quasi-experiment there are no randomized
+assignments to interventions, we study the processes in their natural setting.
+
+## Potential outcomes, causal effects and idealized experiments
+
+Interest is in the **average causal effect** estimated by the **difference estimator**.
+A potential outcome is the outcome for an individual under a potential treatment.
+For this individual the causal effect of the treatment is the difference between 
+the potential outcome if the individual receives the treatment and the potential
+outcome if they do not. We are interested in studying the **average causal effect**
+since this difference may vary from individual to individual. In a randomized 
+controlled experiment, it is expected that
+1. Subjects are randomly selected from the population(ensures average causal effect
+in sample equals average causal effect in population),
+2. Subjects are randomly assigned to treatment and control group (ensures receiving
+a treatment is independent of a subject's potential outcome).
+
+If above conditions are met, then the average causal effect is the expected outcome
+in treatment group less expected outcome in the control:
+
+$$
+\text{Average causal effect}  = E(Y_i|X_i = 1) - E(Y_i|X_i = 0)
+$$
+
+where $X_i$ is a binary treatment indicator. Estimation follows **differences estimator** 
+which is an OLS regression model
+
+$$
+\begin{equation}
+Y_i = \beta_0 + \beta_1X_i + \epsilon_i, i = 1, \dots, n
+\end{equation}
+$${\#eq-ae}
+
+where random assignment ensures $E(\epsilon_i|X_i) = 0$. The difference estimator
+in (@eq-ae) can take additional regressors $W_1, \dots, W_r$ and is called a
+**differences estimator with additional regressors**:
+
+$$
+\begin{equation}
+Y_i = \beta_0 + \beta_1X_i + \beta_2W_{1i} + \dots + \beta_{1+r}W_{ri} +
+\epsilon_i, i = 1, \dots, n
+\end{equation}
+$${\#eq-ae-dear}
+
+It utilizes a **conditional mean independence** assumption that states that
+treatment assignment $X_i$ is random and independent of any pretreatment variable
+$W_i$. This ensures that
+
+$$
+\begin{equation}
+E(\epsilon_i|X_i, W_i) = E(\epsilon_i|W_i) = 0
+\end{equation}
+$$
+ 
+ implying that the conditional expectation of the error term $\epsilon_i$, given 
+ the treatment indicator $X_i$ and the the pretreatment characteristic $W_i$ does
+ not depend on $X_i$.
+ 
+ ### Analysis of experimental data
+ 
+ `STAR` data set from `{AER}` is a large student-teacher achievement ratio randomized 
+ controlled experiment that was assessing whether class size reduction is effective
+ in improving education outcomes. 6400 students were randomly assigned into one
+ of the three interventions: small class (13 to 17 students per teacher),
+ regular class (22 to 25 students per teacher), and regular-with-aide class
+ (22 to 25 students with a full-time teacher’s aide). Teachers were also randomly
+ assigned to classes. The subjects were followed from kindergarten to grade 3 
+ (K,1, 2, 3 suffixes in variable names).
+ 
+```{r}
+data("STAR", package = "AER")
+skimr::skim(STAR)
+```
+ 
+ In essence, there were 2 treatments in each grade (small class with 13 - 17
+ students, and a regular class with 22 - 25 students and a teaching aide). We
+ introduce two binary variables, each being an indicator for the respective treatment
+ group for the difference estimator. This is to capture the treatment effect for each treatment 
+ group separately yielding the population regression model for the test score as
+ 
+ $$
+ \begin{equation}
+ Y_i = \beta_0 + \beta_1 smallClass_i + \beta2RegAide_i + \epsilon_i
+ \end{equation}
+ $${\#eq-pop-model}
+ 
+```{r}
+#| label: tbl-popmod1
+#| tbl-cap: "Project STAR: Differences estimate. Class size reduction improves study performance excpt for grade 1"
+#| tbl-cap-location: bottom
+grades <- c("k",1:3)
+
+# map over grades to create a list of models
+
+star_models <- grades |>
+  set_names(paste0("grade_", grades)) |>
+  map(
+    \(y){
+#       construct the formula dynamically: I(ready + mathy) ~ starY
+      form <- as.formula(paste0("I(read", y, "+ math", y, ") ~ star", y))
+      lm(form, data = STAR)
+    }
+  )
+
+# compute robust standard error
+rob_se <- star_models |>
+ map(\(m) sqrt(diag(vcovHC(m, type = "HC1"))))
+
+# Define which Goodness-of-Fit stats to show and what to call them
+gm1 <- list(
+  list("raw" = "nobs", "clean" = "Observations", "fmt" = 0),
+  list("raw" = "r.squared", "clean" = "R2", "fmt" = 3),
+  list("raw" = "adj.r.squared", "clean" = "Adj. R2", "fmt" = 3),
+  # Added Residual Standard Error
+  list("raw" = "sigma", "clean" = "Residual Std. Error", "fmt" = 3),
+  # Added F-statistic
+  list("raw" = "statistic", "clean" = "F-statistic", "fmt" = 3)
+)
+
+# render table
+
+model_tables(models = star_models, robust_se = rob_se)
+  
+```
+ 
+We can augment the model in (@eq-pop-model) with extra variables under 2 
+circumstances: 
+
+1. Adding the regressors explain some of the observed variations in the outcome
+making the estimates more efficient
+2. If treatment assignment is not random, the estimates obtained in (@eq-pop-model)
+are possibly biased. The additional regressors could mitigate this challenge.
+
+For our setting we could consider 6 additional variables (in a staggered manner):
+
+* *experience* - Teacher's years of experience
+* *boy* - A dummy (student is a boy)
+* *lunch* - Free lunch eligibility (dummy)
+* *black* - Student is black (dummy)
+* *race* - Student's race is other than black or white (dummy)
+* *schoolid* - School indicator variables
+
+**Note**: For randomized controlled experiments, we can make causal claims only 
+for variables that subjects were randomly assigned into.
+
+## Quasi experiments
+
+Quasi experiments exploit "as if" randomness to use methods considered under 
+randomized controlled experiments. They come in two forms:
+
+1. Random variations in individual circumstances allow to view the treatment 
+"as if" it was randomly determined.
+2. The treatment is only partly determined by "as if" random variation.
+
+The former allows the use of either model (@eq-ae-dear), i.e.,
+**the difference estimator with additional regressors**, or, using 
+**difference-in-difference (DID)** if the "as if" randomness
+does not guarantee the non-existence of systematic differences in the control
+and treatment groups. The latter case invites the use of an IV approach for a
+case like model (@eq-ae-dear), utilizing the source of "as if" randomness in 
+treatment assignment as the instrument. Other methods include 
+**sharp regression discontinuity design (RDD)** and 
+**fuzzy regression discontinuity design (FRDD)**. We use simulated data
+to explore these methods
+
+### The difference-in-difference (DID) estimator
+
+The source of "as if" randomness in treatment assignment in quasi-experiments does
+not always rule out systematic differences between control and treatment groups.
+DID involves data in organised in the before and after treatment. 
+
+$$
+\begin{align}
+  \widehat{\beta}_1^{\text{diffs-in-diffs}} =& \, (\overline{Y}^{\text{treatment,after}} - \overline{Y}^{\text{treatment,before}}) - (\overline{Y}^{\text{control,after}} - \overline{Y}^{\text{control,before}}) \\
+  =& \Delta \overline{Y}^{\text{treatment}} - \Delta \overline{Y}^{\text{control}}, 
+\end{align}
+$${\#eq-DID}
+
+with
+
++ $\overline{Y}^{\text{treatment,before}}$ - the sample average in the treatment group before the treatment
+
++ $\overline{Y}^{\text{treatment,after}}$ - the sample average in the treatment group after the treatment
+
++ $\overline{Y}^{\text{treatment,before}}$ - the sample average in the control group before the treatment
+
++ $\overline{Y}^{\text{treatment,after}}$ - the sample average in the control group after the treatment.
+
+We now use R to plot a DID setting.
+
+```{r}
+#| label: fig-did
+#| fig-cap: "Difference-in-differnce plot"
+# initialize plot and add control group
+plot(c(0, 1), c(6, 8), 
+     type = "p",
+     ylim = c(5, 12),
+     xlim = c(-0.3, 1.3),
+     # main = "The Differences-in-Differences Estimator",
+     xlab = "Period",
+     ylab = "Y",
+     col = "steelblue",
+     pch = 20,
+     xaxt = "n",
+     yaxt = "n")
+
+axis(1, at = c(0, 1), labels = c("before", "after"))
+axis(2, at = c(0, 13))
+
+# add treatment group
+points(c(0, 1, 1), c(7, 9, 11), 
+       col = "darkred",
+       pch = 20)
+
+# add line segments
+lines(c(0, 1), c(7, 11), col = "darkred")
+lines(c(0, 1), c(6, 8), col = "steelblue")
+lines(c(0, 1), c(7, 9), col = "darkred", lty = 2)
+lines(c(1, 1), c(9, 11), col = "black", lty = 2, lwd = 2)
+
+# add annotations
+text(1, 10, expression(hat(beta)[1]^{DID}), cex = 0.8, pos = 4)
+text(0, 5.5, "s. mean control", cex = 0.8 , pos = 4)
+text(0, 6.8, "s. mean treatment", cex = 0.8 , pos = 4)
+text(1, 7.9, "s. mean control", cex = 0.8 , pos = 4)
+text(1, 11.1, "s. mean treatment", cex = 0.8 , pos = 4)
+```
+
+The DID estimator (@eq-DID) can take a regression notation: $\hat{\beta_1}^{DID}$
+is the OLS estimator of $\beta_1$ in 
+
+$$
+\begin{equation}
+\Delta Y_i = \beta_0 + \beta_1X_i + \epsilon_i
+\end{equation}
+$${\#eq-DID-1}
+
+with $\Delta Y_i$ denoting the difference in pre and post-treatment outcomes of 
+subject $i$, $X_i$ is the treatment indicator. We can add additional regressors measuring
+pretreatment characteristics to (@eq-DID-1) to get the 
+**difference-in-difference estimator with additional regressors**.
+
+
+$$
+\begin{equation}
+\Delta Y_i = \beta_0 + \beta_1X_i + \beta_2W_{1i} + \dots + \beta_{1+r}W_{ri} +  \epsilon_i
+\end{equation}
+$${\#eq-DID-2}
+
+Simulate data:
+
+```{r}
+set.seed(as.numeric(Sys.Date()))
+# set sample size
+n <- 200
+
+# define treatment effect
+TEffect <- 4
+
+# generate treatment dummy
+TDummy <- c(rep(0, n/2), rep(1, n/2))
+
+# simulate pre- and post-treatment values of the dependent variable
+y_pre <- 7 + rnorm(n)
+y_pre[1:n/2] <- y_pre[1:n/2] - 1
+y_post <- 7 + 2 + TEffect * TDummy + rnorm(n)
+y_post[1:n/2] <- y_post[1:n/2] - 1 
+```
+
+Plot data:
+
+```{r}
+#| label: fig-did-1
+#| fig-cap: "Artificial data for DID estimation"
+pre <- rep(0, length(y_pre[TDummy==0]))
+post <- rep(1, length(y_pre[TDummy==0]))
+
+# plot control group in t=1
+plot(jitter(pre, 0.6), 
+     y_pre[TDummy == 0], 
+     ylim = c(0, 16), 
+     col = alpha("steelblue", 0.3),
+     pch = 20, 
+     xlim = c(-0.5, 1.5),
+     ylab = "Y",
+     xlab = "Period",
+     xaxt = "n"
+     # ,main = "Artificial Data for DID Estimation"
+     )
+
+axis(1, at = c(0, 1), labels = c("before", "after"))
+
+# add treatment group in t=1
+points(jitter(pre, 0.6), 
+       y_pre[TDummy == 1], 
+       col = alpha("darkred", 0.3), 
+       pch = 20)
+
+# add control group in t=2
+points(jitter(post, 0.6),
+       y_post[TDummy == 0], 
+       col = alpha("steelblue", 0.5),
+       pch = 20)
+
+# add treatment group in t=2
+points(jitter(post, 0.6), 
+       y_post[TDummy == 1], 
+       col = alpha("darkred", 0.5),
+       pch = 20)
+```
+
+Compute DID estimate by hand:
+
+```{r}
+# compute the DID estimator for the treatment effect 'by hand'
+mean(y_post[TDummy == 1]) - mean(y_pre[TDummy == 1]) - 
+(mean(y_post[TDummy == 0]) - mean(y_pre[TDummy == 0]))
+
+```
+
+Compute DID using a linear model:
+
+```{r}
+# compute the DID estimator using a linear model
+lm(I(y_post - y_pre) ~ TDummy) %>% render_summary()
+
+```
+
+### Regression discontinuity estimators
+
+Consider the model
+
+$$
+\begin{align}
+  Y_i =& \beta_0 + \beta_1 X_i + \beta_2 W_i + u_i
+\end{align}
+$${\#eq-SRDDsetting}
+
+and let
+
+$$
+\begin{align*}
+X_i =& 
+  \begin{cases}
+    1, & W_i \geq c \\
+    0, & W_i < c,
+  \end{cases}
+\end{align*}
+$$
+so that the receipt of treatment, $X_i$, is determined by some threshold $c$ of a continuous variable $W_i$, the so called running variable. The idea of *regression discontinuity design* is to use observations with a $W_i$ close to $c$ for estimation of $\beta_1$. $\beta_1$ is the average treatment effect for individuals with $W_i = c$ which is assumed to be a good approximation to the treatment effect in the population. (@eq-SRDDsetting) is called a *sharp regression discontinuity design* because treatment assignment is deterministic and discontinuous at the cutoff: all observations with $W_i < c$ do not receive treatment and all observations where $W_i \geq c$ are treated.  
+
+```{r}
+#| label: fig-rdd
+#| fig-cap: "Regression discontinuity plot"
+set.seed(as.numeric(Sys.Date()))
+
+# generate some sample data
+W <- runif(1000, -1, 1)
+y <- 3 + 2 * W + 10 * (W>=0) + rnorm(1000)
+
+# construct rdd_data 
+data <- rdd_data(y, W, cutpoint = 0)
+
+# plot the sample data
+plot(data,
+     col = "steelblue",
+     cex = 0.35, 
+     xlab = "W", 
+     ylab = "Y")
+```
+
+The argument `nbins` sets the number of bins the running variable is divided 
+into for aggregation. The dots represent bin averages of the outcome variable.
+
+We use the function `rdd_reg_lm()` to estimate the treatment effect using model
+(@eq-SRDDsetting). `slope = "same"` restricts the slopes of the estimated regression
+function to be the same on both sides of the jump at cutpoint $W = 0$.
+
+```{r}
+rdd_mod <- rdd_reg_lm(rdd_object = data, 
+                      slope = "same")
+render_summary(rdd_mod)
+```
+
+You can visualize by calling plot
+
+```{r}
+# plot the RDD model along with binned observations
+plot(rdd_mod,
+     cex = 0.35, 
+     col = "steelblue", 
+     xlab = "W", 
+     ylab = "Y")
+```
+
+So far we assumed that crossing of the threshold determines receipt of treatment so that the jump of the population regression functions at the threshold can be regarded as the causal effect of the treatment.
+
+When crossing the threshold $c$ is not the only cause for receipt of the treatment, treatment is no a deterministic function of $W_i$. Instead, it is useful to think of $c$ as a threshold where the *probability* of receiving the treatment jumps.
+
+This jump may be due to unobservable variables that have impact on the probability of being treated. Thus, $X_i$ in (@eq-SRDDsetting) will be correlated with the error $u_i$ and it becomes more difficult to consistently estimate the treatment effect. In this setting, using a *fuzzy regression discontinuity design* which is based an IV approach may be a remedy: take the binary variable $Z_i$ as an indicator for crossing of the threshold,
+
+$$
+\begin{align*}
+  Z_i = \begin{cases}
+    1, & W_i \geq c \\
+    0, & W_i < c,
+  \end{cases}
+\end{align*}
+$$
+and assume that $Z_i$ relates to $Y_i$ only through the treatment indicator $X_i$. Then $Z_i$ and $u_i$ are uncorrelated but $Z_i$ influences receipt of treatment so it is correlated with $X_i$. Thus, $Z_i$ is a valid instrument for $X_i$ and (@eq-SRDDsetting) can be estimated using TSLS.  
+
+The following code chunk generates sample data where observations with a value of the running variable $W_i$ below the cutoff $c=0$ do not receive treatment and observations with $W_i \geq 0$ do receive treatment with a probability of $80\%$ so that treatment status is only partially determined by the running variable and the cutoff. Treatment leads to an increase in $Y$ by $2$ units. Observations with $W_i \geq 0$ that do not receive treatment are called *no-shows*: think of an individual that was assigned to receive the treatment but somehow manages to avoid it.
+
+
+```{r}
+# generate sample data
+set.seed(as.numeric(Sys.Date()))
+mu <- c(0, 0)
+sigma <- matrix(c(1, 0.7, 0.7, 1), ncol = 2)
+
+set.seed(1234)
+d <- as.data.frame(mvrnorm(2000, mu, sigma))
+colnames(d) <- c("W", "Y")
+
+# introduce fuzziness
+d$treatProb <- ifelse(d$W < 0, 0, 0.8)
+
+fuzz <- sapply(X = d$treatProb, FUN = function(x) rbinom(1, 1, prob = x))
+
+# treatment effect
+d$Y <- d$Y + fuzz * 2
+```
+
+Plot:
+
+```{r}
+# generate a colored plot of treatment and control group
+plot(d$W, d$Y,
+     col = c("steelblue", "darkred")[factor(fuzz)], 
+     pch= 20, 
+     cex = 0.5,
+     xlim = c(-3, 3),
+     ylim = c(-3.5, 5),
+     xlab = "W",
+     ylab = "Y")
+
+# add a dashed vertical line at cutoff
+abline(v = 0, lty = 2)
+#add legend
+legend("topleft",pch=20,col=c("steelblue","darkred"),
+       legend=c("Do not receive treatment","Receive treatment"))
+```
+
+Obviously, receipt of treatment is no longer a deterministic function of the running variable $W$. Some observations with $W\geq0$ *did not* receive the treatment. We may estimate a FRDD by additionally setting `treatProb` as the assignment variable `z` in `rdd_data`. Then `rdd_reg_lm()` applies the following TSLS procedure: treatment is predicted using $W_i$ and the cutoff dummy $Z_i$, the instrumental variable, in the first stage regression. The fitted values from the first stage regression are used to obtain a consistent estimate of the treatment effect using the second stage where the outcome $Y$ is regressed on the fitted values and the running variable $W$.
+
+```{r}
+# estimate the Fuzzy RDD
+data <- rdd_data(d$Y, d$W, 
+                 cutpoint = 0, 
+                 z = d$treatProb)
+
+frdd_mod <- rdd_reg_lm(rdd_object = data, 
+                       slope = "same")
+frdd_mod %>% render_summary()
+
+```
+
+The estimate is close to $2$, the population treatment effect. We may call `plot()` on the model object to obtain a figure consisting of binned data and the estimated regression function. 
+
+```{r}
+# plot estimated FRDD function
+plot(frdd_mod, 
+     cex = 0.5, 
+     lwd = 0.4,
+     xlim = c(-4, 4),
+     ylim = c(-3.5, 5),
+     xlab = "W",
+     ylab = "Y")
+```
+
+What if we used a SRDD instead, thereby ignoring the fact that treatment is not perfectly determined by the cutoff in  $W$? We may get an impression of the consequences by estimating an SRDD using the previously simulated data.
+
+
+```{r}
+# estimate SRDD
+data <- rdd_data(d$Y, 
+                 d$W, 
+                 cutpoint = 0)
+
+srdd_mod <- rdd_reg_lm(rdd_object = data, 
+                       slope = "same")
+srdd_mod %>% render_summary()
+
+```
+
+The estimate obtained using a SRDD is suggestive of a substantial downward bias. In fact, this procedure is inconsistent for the true causal effect so increasing the sample would not alleviate the bias.
