@@ -508,6 +508,6 @@
     "href": "posts/2026-02-22-ML-project-reproducibility/index.html#reproducibility",
     "title": "Reproducing Machine Learning prediction Results: A case for Predicting Food‐Security Crises in the Horn of Africa.",
     "section": "Reproducibility",
-    "text": "Reproducibility\nThe authors provided input datasets and supprting scripts for reproducibility. However, no package versioning .toml file was available making reproducing the exact environment difficult. We used uv to initiate the ML environment, and used gcp’s vertex AI environment to run the models in place of the internal HPC cluster environment that the authors used. We incorporated github workflows building a docker image that was pushed to container registry to run the model with every push. We were not bale to reproduce the figures in the paper as the referenced input files were not shared."
+    "text": "Reproducibility\nThe authors provided input datasets and supprting scripts for reproducibility. However, no package versioning .toml file was available making reproducing the exact environment difficult. We used uv to initiate the ML environment, and used gcp’s vertex AI environment to run the models in place of the internal HPC cluster environment that the authors used. We incorporated github workflows building a docker image that was pushed to container registry to run the model with every push. We were unable to reproduce the figures in the paper as the referenced input files were not shared."
   }
 ]
