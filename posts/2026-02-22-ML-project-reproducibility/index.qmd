@@ -1,0 +1,115 @@
+---
+title: "Reproducing Machine Learning prediction Results: A case for Predicting Food‐Security Crises in the Horn of Africa."
+description: "Reproducing the work of Busker et al. (2024) that Predicted Food-Security Crises in the Horn of Africa using an XGBOOST model."
+author:
+  - name: Basil Okola
+    url: https://bokola.github.io/
+    # orcid: 0000-0002-5300-3075
+    affiliation: Master of Statistics and Data Science @ Hasselt University
+    affiliation-url: https://ucsb-meds.github.io/ 
+date: 2026-02-22
+categories: [ML, XGBOOST, Python, SHAP] # self-defined categories
+# include-after-body: MLOPs-mlflow-docker-gc-1.html
+citation: 
+  url: https://bokola.github.io/posts/2026-02-22-ML-project-reproducibility/ 
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+execute:
+  # echo: false
+  warning: false
+bibliography: reference.bib
+csl: "nlm-citation-sequence-superscript.csl"
+editor_options: 
+  chunk_output_type: console
+code-fold: true
+---
+
+# Introduction
+
+The Horn of Africa (Somalia, Ethiopia, Kenya) is among the world's most vulnerable regions for food security driven by extreme droughts that are projected to increase in frequency due to anthropogenic warming (driven by human activities, and population growth could be the biggest drivers of food insecurity). With rainfall failing, global warming worsening, drought and  food insecurity is only going to get worse necessitating the need to strengthen food-security early warning systems and increase the understanding of potential causes of food-insecurity crises under dynamic contexts.
+
+Africa primarily uses U.S Agency for Development's Famine Early Warning Systems Network (FEWS NET) that uses a cocktail of observed and forecasted drought indicators, vulnerability indicators and expert judgment in assessing local and regional food security. The assessment process uses key Integrated Food Security Phase Classification (IPC) protocols and on top of assessing the current food-security situation, they include projections of food security for the near term (up to 4 months in future) and medium term (up to 8 months in future) .  Other than FEWS NET, there are other early warning systems operated by the World Food Program (WFP) and the Food and Agricultural Organization of the United Nations (FAO) [@busker2024predicting].
+
+However, FEWS NET faces challenges predicting food security. Despite the ability to accurately predict soil moisture and drought forecasts, and crop yield forecasts weeks or months in advance, food security conditions are often difficult to predict given other unexpected regional drivers such as desert-locust or conflict outbreaks. This is compounded with scarcity of studies testing the added value of alternative prediction methods.
+
+Emergence of powerful machine learning (ML) algorithms such as  Chen & Guestrin's  XGBoost (2016) make it possible for incorporating ML in monitoring food consumption, malnutrition, and food insecurity by utilizing data on their drivers. According to the authors, despite this explosion in advanced ML algorithms, not one study has focused on forecasting food security situation in the entire Horn of Africa, and rarely are the performance of such prediction models compared to operational systems like FEWS NET.
+
+**Objective**: The study sought to predict food security dynamics and situations in the Horn of Africa months in advance using historical data on natural and socio-economic processes in a machine learning model. The authors also sought to compare their predictions to FEWS NET food-security outlooks to pinpoint where their predictions provided additional value.
+
+# Methods
+
+Applied Extreme gradient Boosting (XGBoost) which is an ensemble decision-tree algorithm, like random forest regression, with ability to boost individual trees making ideal for modelling more complex interactions. Features included multiple explanatory natural hazard and socio-economic variables. Being a time-series problem, splitting was done temporally, 2009-2019 for training and 2019-2022 for testing. Three benchmark models were used to evaluate the predictions.
+
+## Data
+
+FEWS IPC acute-food security values as target variable and 20 input features. Administrative units used as the spatial level of analysis for being more consistent and smaller in size than other spatial units and for better translation of of the study results into early warning and action practices and policies.
+
+### Acute Food-Insecurity Monitoring Using IPC
+ 
+The integrated phase classification (IPC) was created to represent and evaluate four pillars underlying global food-security assessment: food access, food availability, food utilization, and stability. However, IPC uses three different scales to measure food security and nutrition: acute food insecurity, chronic food insecurity, and acute malnutrition. This study focused on acute food insecurity. Acute food insecurity is categorized into five cut-offs: phase 1, minimal/none; phase 2, stressed; phase 3, crisis; phase 4, emergency; phase 5, catastrophe/famine. 
+
+### Target variable: FEWS IPC Food-Security Maps
+
+FEWA NET uses IPC scale and key protocols described above to produce current FEWS IPC acute food insecurity estimates, that are henceforth referred to as FEWS IPC values. The FEWS NET current situation estimates are released every 3-4 months annually and can be downloaded as shapefiles from the FEWS NET data portal. The study uses area-level classification which assigns the highest food-security class faced by at least 20% of the population. Using the maps, a population weighted spatial mean per administrative unit is calculated using WorldPop unconstrained data adjusted to match the official country totals from the UN.
+
+### Natural Hazard Data
+
+*Rainfall indicators*: Daily CHIRPS rainfall data over the period 1981-2022. Generated variables included total rainfall, total number of wet days (>1 mm/day), and maximum dry-spell lengths (>5 consecutive dry days per month) which can be >31 days if dry spell extends over several months. These were averaged to the scale of administrative units.
+
+*Drought indices*: Three different drought indices standardized precipitation index (SPI) - widely used in characterizing meteorological drought (soil moisture at short timescales, and ground water reservoir storage at longer timescale), standardized precipitation evapotranspiration index (SPEI) - a multiscalar, climate-based, drought index that measures the difference between precipitation and potential evapotranspiration (PET) to identify drought severity, duration, and onset. The third is  standardized soil moisture index (SSMI) - a robust, satellite-derived drought indicator that quantifies soil moisture anomalies by comparing current water content against long-term, site-specific historical averages (often using z-scores). These drought indices were calculated using methodology defined in Odongo et al. (2023) [@odongo2023propagation]
+
+*Agricultural indicators*: Normalized Difference Vegetation Index (NVDI) was used - a widely used remote sensing measurement that assesses vegetation health, density, and biomass by analyzing how plants reflect red and near-infrared (NIR) light, calculated as (NIR - Red) / (NIR + Red). Higher positive values (closer to 1) signify dense, healthy vegetation, while values near zero or negative indicate barren land, water, snow, or stressed plants, making it crucial for agriculture, climate studies, and disaster management. 
+
+*Desert locusts*: Over 10, 000 data points on swarms of desert locusts was obtained from FAO locust hub. The total area affected each month was calculated as a percentage of the overall area within the defined administrative unit.
+
+*Climate teleconnections*: Since the climate in Africa is strongly influenced by sea surface temperatures (SSTs), multiple variables including SSTs were included: the Indian Ocean Dipole (IOD), the multivariate ENSO index (MEI), and NINO 3.4.
+
+### Socio-Economic Data
+
+*Food and fuel prices*: From WFP's price database. Maize was selected as main crop for each country, limited data availability in the price database limiting inclusion of other crops. The pricing data spanned 14 markets in Kenya, 98 markets in Ethiopia, and 29 markets in Somalia. These markets were geolocated and the closest market to each administrative unit was selected. Diesel fuel prices were also included for being a driver of food crises in the past.
+
+*Macroeconomic indicators*: Consumer price index (CPI) as an inflation indicator coming from Inflation data from the National Bureau of Statistics (NBS) for Somalia, and World Bank Global Inflation Data set for Kenya and Ethiopia. Gross domestic product (GDP) per capita was used as an indicator for national economic growth. The indicators for each country were assigned to the country's administrative units.
+
+*Historical food security situation*: Since Upcoming food security dynamics are dependent on past and current prevailing food security situations, FEWS IPC values of the previous timesteps were added as features in the model.
+
+*Humanitarian food assistance*: Data on the impact of humanitarian food assistance was extracted from FEWS portal. The data marks (with exclamation mark (!)) areas that would likely have been one phase more food insecure were it not for in/direct food assistance.
+
+*Conflicts*: Conflict data was extracted from the Armed Conflict Location & Events Data Project (ACLED). The authors calculated both the total number of conflicts and the total number of fatalities per administrative unit per month.
+
+## Machine-Learning Model Architecture
+
+### XGBoost model
+An advanced decision tree model that is an improvement of traditional decision tree approaches by not depending on a single tree. That improvement comes from its ability to integrates an ensemble, or a group of different decision trees. It uses a scalable tree-boosting mechanism to optimize predictions. Simple decision trees called shallow (weak) learners are iteratively added to minimize the errors of previous predictions. These trees are simultaneously subjected to regularization to prevent overfitting.
+There were seven lead times (0, 1, 2, 3, 4, 8, 12) resulting into seven separate XGBoost models. Data from 213 administrative units was pulled into 3 livelihood zones: pastoral, agropastoral, and crop farming, and a different model made for each livelihood zone, resulting into 21 unique machine learning models.
+
+### Train -Test-Validation
+Being a time-series data, temporal splitting adhering to 80:20 ratio was employed. Training set covered the year 2009 - 2019, white test set covered the years 2019 - 2022. This keeps the test data set out-of-sample, which is needed in time-series setting to ensure temporal independence of the data set.
+
+### Hyperparameter optimization
+
+A walk-forward cross validation was executed to tune model hyperparameters using 5 different validation sets. Resulting optimal parameters were as follows: maximum tree depth: 4, number of trees/estimators: 400 and learning rate: 0.01
+
+## Feature engineering
+
+For each input feature rolling  average over both the last 4 and 12 months were calculated  for each individual month. This creates longer accumulations that could be important for the model since food security crises often develop over longer time scales. Additional MAM, OND rainfall onsets were marked as "1" in the model data set to identify timing of main rainy seasons.
+Additionally, memory effects in the target variable FEWS IPC were accounted for by including values from 1, 4, and 8 months prior, along with the mean FEWS IPC value from the past 12 months. Country names were included to enable factoring of country-specific elements (such as drought intervention policies) not included in the original data. In total there were 80 unique features.
+
+## Benchmark Models and Perfomance Metrics
+
+The predictions in the test set (2019–2022) were evaluated using the mean absolute error (MAE), the coefficient of determination ($R^2$), the hit rate, and the false‐alarm rate. Three benchmark models were used and served as a performance reference: (a) the state‐of‐the‐art FEWS NET food‐security outlooks, (b) a seasonality model based on historical FEWS IPC observations, and (c) a persistence model assuming no change in the FEWS IPC class.
+
+## Interpretation of Model Results
+
+For model interpretability, the authors used SHAP (Shapley Additive Explanations) framework to interpret model predictions and understand how the model uses the features. Shapley values have their origin from game theory and are solutions to problems of dividing a game's single payout among all players according to their respective predictions. In our case, the payout is the prediction from  the statistical model, and the features are the contributors. Shapley framework is unique for showing the impact of every individual feature on each prediction (local feature importance). The SHAP values are in the same unit as the target variable offering direct interpretations. For instance, a SHAP value of 0.4 means that this feature increased FEWS IPC food insecurity with 0.4. Thus, SHAP can reveal the influence of any of the features on any prediction. This differentiates SHAP from the many other explanation methods based on global interpretation that only show the contribution of the features to the model as a whole [@busker2024predicting].
+
+## Reproducibility
+
+The authors provided input datasets and supprting scripts for reproducibility. However, no package versioning .toml file was available making reproducing the exact environment difficult. We used uv to initiate the ML environment, and used gcp's vertex AI environment to run the models in place of the internal HPC cluster environment that the authors used. We incorporated github workflows building a docker image that was pushed to container registry to run the model with every push. We were not bale to reproduce the figures in the paper as the referenced input files were not shared.
+
+# Results
+
+We were able to generate all the model output files and the Shapley plots. Our reproducible workflow is hosted at [foodSecurityPred](https://github.com/Bokola/foodSecurityPred).
+
+# Recommendations
+
+Machine learning environments are fast evolving. To achieve reproducibility requires sharing not just the data and accompanying code, but also the .toml environment listing specific versions of all libraries called. It is advisable to share a containerized image such as a docker image to ensure true reproducibility.
+

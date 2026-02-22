@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Basil Okola">
+<meta name="dcterms.date" content="2026-02-22">
+<meta name="description" content="Reproducing the work of Busker et al.&nbsp;(2024) that Predicted Food-Security Crises in the Horn of Africa using an XGBOOST model.">
+
+<title>Reproducing Machine Learning prediction Results: A case for Predicting Food‐Security Crises in the Horn of Africa.</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-223d728f8d4ae8f037e471e842545cb2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Reproducing Machine Learning prediction Results: A case for Predicting Food‐Security Crises in the Horn of Africa.">
+<meta property="og:description" content="Reproducing the work of Busker et al.&nbsp;(2024) that Predicted Food-Security Crises in the Horn of Africa using an XGBOOST model.">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">Portfolio</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../resources.html"> 
+<span class="menu-text">resources</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">posts</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page-left">
+      <h1 class="title">Reproducing Machine Learning prediction Results: A case for Predicting Food‐Security Crises in the Horn of Africa.</h1>
+                  <div>
+        <div class="description">
+          Reproducing the work of Busker et al.&nbsp;(2024) that Predicted Food-Security Crises in the Horn of Africa using an XGBOOST model.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">ML</div>
+                <div class="quarto-category">XGBOOST</div>
+                <div class="quarto-category">Python</div>
+                <div class="quarto-category">SHAP</div>
+              </div>
+                  </div>
+  </div>
+    
+  <div class="quarto-title-meta-author column-page-left">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <p class="author"><a href="https://bokola.github.io/">Basil Okola</a> </p>
+    </div>
+    <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              <a href="https://ucsb-meds.github.io/">
+              Master of Statistics and Data Science @ Hasselt University
+              </a>
+            </p>
+        </div>
+    </div>
+
+  <div class="quarto-title-meta column-page-left">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">February 22, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <ul class="collapse">
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a>
+  <ul class="collapse">
+  <li><a href="#acute-food-insecurity-monitoring-using-ipc" id="toc-acute-food-insecurity-monitoring-using-ipc" class="nav-link" data-scroll-target="#acute-food-insecurity-monitoring-using-ipc">Acute Food-Insecurity Monitoring Using IPC</a></li>
+  <li><a href="#target-variable-fews-ipc-food-security-maps" id="toc-target-variable-fews-ipc-food-security-maps" class="nav-link" data-scroll-target="#target-variable-fews-ipc-food-security-maps">Target variable: FEWS IPC Food-Security Maps</a></li>
+  <li><a href="#natural-hazard-data" id="toc-natural-hazard-data" class="nav-link" data-scroll-target="#natural-hazard-data">Natural Hazard Data</a></li>
+  <li><a href="#socio-economic-data" id="toc-socio-economic-data" class="nav-link" data-scroll-target="#socio-economic-data">Socio-Economic Data</a></li>
+  </ul></li>
+  <li><a href="#machine-learning-model-architecture" id="toc-machine-learning-model-architecture" class="nav-link" data-scroll-target="#machine-learning-model-architecture">Machine-Learning Model Architecture</a>
+  <ul class="collapse">
+  <li><a href="#xgboost-model" id="toc-xgboost-model" class="nav-link" data-scroll-target="#xgboost-model">XGBoost model</a></li>
+  <li><a href="#train--test-validation" id="toc-train--test-validation" class="nav-link" data-scroll-target="#train--test-validation">Train -Test-Validation</a></li>
+  <li><a href="#hyperparameter-optimization" id="toc-hyperparameter-optimization" class="nav-link" data-scroll-target="#hyperparameter-optimization">Hyperparameter optimization</a></li>
+  </ul></li>
+  <li><a href="#feature-engineering" id="toc-feature-engineering" class="nav-link" data-scroll-target="#feature-engineering">Feature engineering</a></li>
+  <li><a href="#benchmark-models-and-perfomance-metrics" id="toc-benchmark-models-and-perfomance-metrics" class="nav-link" data-scroll-target="#benchmark-models-and-perfomance-metrics">Benchmark Models and Perfomance Metrics</a></li>
+  <li><a href="#interpretation-of-model-results" id="toc-interpretation-of-model-results" class="nav-link" data-scroll-target="#interpretation-of-model-results">Interpretation of Model Results</a></li>
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">Reproducibility</a></li>
+  </ul></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  <li><a href="#recommendations" id="toc-recommendations" class="nav-link" data-scroll-target="#recommendations">Recommendations</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>The Horn of Africa (Somalia, Ethiopia, Kenya) is among the world’s most vulnerable regions for food security driven by extreme droughts that are projected to increase in frequency due to anthropogenic warming (driven by human activities, and population growth could be the biggest drivers of food insecurity). With rainfall failing, global warming worsening, drought and food insecurity is only going to get worse necessitating the need to strengthen food-security early warning systems and increase the understanding of potential causes of food-insecurity crises under dynamic contexts.</p>
+<p>Africa primarily uses U.S Agency for Development’s Famine Early Warning Systems Network (FEWS NET) that uses a cocktail of observed and forecasted drought indicators, vulnerability indicators and expert judgment in assessing local and regional food security. The assessment process uses key Integrated Food Security Phase Classification (IPC) protocols and on top of assessing the current food-security situation, they include projections of food security for the near term (up to 4 months in future) and medium term (up to 8 months in future) . Other than FEWS NET, there are other early warning systems operated by the World Food Program (WFP) and the Food and Agricultural Organization of the United Nations (FAO)<span class="citation" data-cites="busker2024predicting"><sup><a href="#ref-busker2024predicting" role="doc-biblioref">1</a></sup></span>.</p>
+<p>However, FEWS NET faces challenges predicting food security. Despite the ability to accurately predict soil moisture and drought forecasts, and crop yield forecasts weeks or months in advance, food security conditions are often difficult to predict given other unexpected regional drivers such as desert-locust or conflict outbreaks. This is compounded with scarcity of studies testing the added value of alternative prediction methods.</p>
+<p>Emergence of powerful machine learning (ML) algorithms such as Chen &amp; Guestrin’s XGBoost (2016) make it possible for incorporating ML in monitoring food consumption, malnutrition, and food insecurity by utilizing data on their drivers. According to the authors, despite this explosion in advanced ML algorithms, not one study has focused on forecasting food security situation in the entire Horn of Africa, and rarely are the performance of such prediction models compared to operational systems like FEWS NET.</p>
+<p><strong>Objective</strong>: The study sought to predict food security dynamics and situations in the Horn of Africa months in advance using historical data on natural and socio-economic processes in a machine learning model. The authors also sought to compare their predictions to FEWS NET food-security outlooks to pinpoint where their predictions provided additional value.</p>
+</section>
+<section id="methods" class="level1">
+<h1>Methods</h1>
+<p>Applied Extreme gradient Boosting (XGBoost) which is an ensemble decision-tree algorithm, like random forest regression, with ability to boost individual trees making ideal for modelling more complex interactions. Features included multiple explanatory natural hazard and socio-economic variables. Being a time-series problem, splitting was done temporally, 2009-2019 for training and 2019-2022 for testing. Three benchmark models were used to evaluate the predictions.</p>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p>FEWS IPC acute-food security values as target variable and 20 input features. Administrative units used as the spatial level of analysis for being more consistent and smaller in size than other spatial units and for better translation of of the study results into early warning and action practices and policies.</p>
+<section id="acute-food-insecurity-monitoring-using-ipc" class="level3">
+<h3 class="anchored" data-anchor-id="acute-food-insecurity-monitoring-using-ipc">Acute Food-Insecurity Monitoring Using IPC</h3>
+<p>The integrated phase classification (IPC) was created to represent and evaluate four pillars underlying global food-security assessment: food access, food availability, food utilization, and stability. However, IPC uses three different scales to measure food security and nutrition: acute food insecurity, chronic food insecurity, and acute malnutrition. This study focused on acute food insecurity. Acute food insecurity is categorized into five cut-offs: phase 1, minimal/none; phase 2, stressed; phase 3, crisis; phase 4, emergency; phase 5, catastrophe/famine.</p>
+</section>
+<section id="target-variable-fews-ipc-food-security-maps" class="level3">
+<h3 class="anchored" data-anchor-id="target-variable-fews-ipc-food-security-maps">Target variable: FEWS IPC Food-Security Maps</h3>
+<p>FEWA NET uses IPC scale and key protocols described above to produce current FEWS IPC acute food insecurity estimates, that are henceforth referred to as FEWS IPC values. The FEWS NET current situation estimates are released every 3-4 months annually and can be downloaded as shapefiles from the FEWS NET data portal. The study uses area-level classification which assigns the highest food-security class faced by at least 20% of the population. Using the maps, a population weighted spatial mean per administrative unit is calculated using WorldPop unconstrained data adjusted to match the official country totals from the UN.</p>
+</section>
+<section id="natural-hazard-data" class="level3">
+<h3 class="anchored" data-anchor-id="natural-hazard-data">Natural Hazard Data</h3>
+<p><em>Rainfall indicators</em>: Daily CHIRPS rainfall data over the period 1981-2022. Generated variables included total rainfall, total number of wet days (&gt;1 mm/day), and maximum dry-spell lengths (&gt;5 consecutive dry days per month) which can be &gt;31 days if dry spell extends over several months. These were averaged to the scale of administrative units.</p>
+<p><em>Drought indices</em>: Three different drought indices standardized precipitation index (SPI) - widely used in characterizing meteorological drought (soil moisture at short timescales, and ground water reservoir storage at longer timescale), standardized precipitation evapotranspiration index (SPEI) - a multiscalar, climate-based, drought index that measures the difference between precipitation and potential evapotranspiration (PET) to identify drought severity, duration, and onset. The third is standardized soil moisture index (SSMI) - a robust, satellite-derived drought indicator that quantifies soil moisture anomalies by comparing current water content against long-term, site-specific historical averages (often using z-scores). These drought indices were calculated using methodology defined in Odongo et al.&nbsp;(2023)<span class="citation" data-cites="odongo2023propagation"><sup><a href="#ref-odongo2023propagation" role="doc-biblioref">2</a></sup></span></p>
+<p><em>Agricultural indicators</em>: Normalized Difference Vegetation Index (NVDI) was used - a widely used remote sensing measurement that assesses vegetation health, density, and biomass by analyzing how plants reflect red and near-infrared (NIR) light, calculated as (NIR - Red) / (NIR + Red). Higher positive values (closer to 1) signify dense, healthy vegetation, while values near zero or negative indicate barren land, water, snow, or stressed plants, making it crucial for agriculture, climate studies, and disaster management.</p>
+<p><em>Desert locusts</em>: Over 10, 000 data points on swarms of desert locusts was obtained from FAO locust hub. The total area affected each month was calculated as a percentage of the overall area within the defined administrative unit.</p>
+<p><em>Climate teleconnections</em>: Since the climate in Africa is strongly influenced by sea surface temperatures (SSTs), multiple variables including SSTs were included: the Indian Ocean Dipole (IOD), the multivariate ENSO index (MEI), and NINO 3.4.</p>
+</section>
+<section id="socio-economic-data" class="level3">
+<h3 class="anchored" data-anchor-id="socio-economic-data">Socio-Economic Data</h3>
+<p><em>Food and fuel prices</em>: From WFP’s price database. Maize was selected as main crop for each country, limited data availability in the price database limiting inclusion of other crops. The pricing data spanned 14 markets in Kenya, 98 markets in Ethiopia, and 29 markets in Somalia. These markets were geolocated and the closest market to each administrative unit was selected. Diesel fuel prices were also included for being a driver of food crises in the past.</p>
+<p><em>Macroeconomic indicators</em>: Consumer price index (CPI) as an inflation indicator coming from Inflation data from the National Bureau of Statistics (NBS) for Somalia, and World Bank Global Inflation Data set for Kenya and Ethiopia. Gross domestic product (GDP) per capita was used as an indicator for national economic growth. The indicators for each country were assigned to the country’s administrative units.</p>
+<p><em>Historical food security situation</em>: Since Upcoming food security dynamics are dependent on past and current prevailing food security situations, FEWS IPC values of the previous timesteps were added as features in the model.</p>
+<p><em>Humanitarian food assistance</em>: Data on the impact of humanitarian food assistance was extracted from FEWS portal. The data marks (with exclamation mark (!)) areas that would likely have been one phase more food insecure were it not for in/direct food assistance.</p>
+<p><em>Conflicts</em>: Conflict data was extracted from the Armed Conflict Location &amp; Events Data Project (ACLED). The authors calculated both the total number of conflicts and the total number of fatalities per administrative unit per month.</p>
+</section>
+</section>
+<section id="machine-learning-model-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="machine-learning-model-architecture">Machine-Learning Model Architecture</h2>
+<section id="xgboost-model" class="level3">
+<h3 class="anchored" data-anchor-id="xgboost-model">XGBoost model</h3>
+<p>An advanced decision tree model that is an improvement of traditional decision tree approaches by not depending on a single tree. That improvement comes from its ability to integrates an ensemble, or a group of different decision trees. It uses a scalable tree-boosting mechanism to optimize predictions. Simple decision trees called shallow (weak) learners are iteratively added to minimize the errors of previous predictions. These trees are simultaneously subjected to regularization to prevent overfitting. There were seven lead times (0, 1, 2, 3, 4, 8, 12) resulting into seven separate XGBoost models. Data from 213 administrative units was pulled into 3 livelihood zones: pastoral, agropastoral, and crop farming, and a different model made for each livelihood zone, resulting into 21 unique machine learning models.</p>
+</section>
+<section id="train--test-validation" class="level3">
+<h3 class="anchored" data-anchor-id="train--test-validation">Train -Test-Validation</h3>
+<p>Being a time-series data, temporal splitting adhering to 80:20 ratio was employed. Training set covered the year 2009 - 2019, white test set covered the years 2019 - 2022. This keeps the test data set out-of-sample, which is needed in time-series setting to ensure temporal independence of the data set.</p>
+</section>
+<section id="hyperparameter-optimization" class="level3">
+<h3 class="anchored" data-anchor-id="hyperparameter-optimization">Hyperparameter optimization</h3>
+<p>A walk-forward cross validation was executed to tune model hyperparameters using 5 different validation sets. Resulting optimal parameters were as follows: maximum tree depth: 4, number of trees/estimators: 400 and learning rate: 0.01</p>
+</section>
+</section>
+<section id="feature-engineering" class="level2">
+<h2 class="anchored" data-anchor-id="feature-engineering">Feature engineering</h2>
+<p>For each input feature rolling average over both the last 4 and 12 months were calculated for each individual month. This creates longer accumulations that could be important for the model since food security crises often develop over longer time scales. Additional MAM, OND rainfall onsets were marked as “1” in the model data set to identify timing of main rainy seasons. Additionally, memory effects in the target variable FEWS IPC were accounted for by including values from 1, 4, and 8 months prior, along with the mean FEWS IPC value from the past 12 months. Country names were included to enable factoring of country-specific elements (such as drought intervention policies) not included in the original data. In total there were 80 unique features.</p>
+</section>
+<section id="benchmark-models-and-perfomance-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="benchmark-models-and-perfomance-metrics">Benchmark Models and Perfomance Metrics</h2>
+<p>The predictions in the test set (2019–2022) were evaluated using the mean absolute error (MAE), the coefficient of determination (<span class="math inline">\(R^2\)</span>), the hit rate, and the false‐alarm rate. Three benchmark models were used and served as a performance reference: (a) the state‐of‐the‐art FEWS NET food‐security outlooks, (b) a seasonality model based on historical FEWS IPC observations, and (c) a persistence model assuming no change in the FEWS IPC class.</p>
+</section>
+<section id="interpretation-of-model-results" class="level2">
+<h2 class="anchored" data-anchor-id="interpretation-of-model-results">Interpretation of Model Results</h2>
+<p>For model interpretability, the authors used SHAP (Shapley Additive Explanations) framework to interpret model predictions and understand how the model uses the features. Shapley values have their origin from game theory and are solutions to problems of dividing a game’s single payout among all players according to their respective predictions. In our case, the payout is the prediction from the statistical model, and the features are the contributors. Shapley framework is unique for showing the impact of every individual feature on each prediction (local feature importance). The SHAP values are in the same unit as the target variable offering direct interpretations. For instance, a SHAP value of 0.4 means that this feature increased FEWS IPC food insecurity with 0.4. Thus, SHAP can reveal the influence of any of the features on any prediction. This differentiates SHAP from the many other explanation methods based on global interpretation that only show the contribution of the features to the model as a whole<span class="citation" data-cites="busker2024predicting"><sup><a href="#ref-busker2024predicting" role="doc-biblioref">1</a></sup></span>.</p>
+</section>
+<section id="reproducibility" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
+<p>The authors provided input datasets and supprting scripts for reproducibility. However, no package versioning .toml file was available making reproducing the exact environment difficult. We used uv to initiate the ML environment, and used gcp’s vertex AI environment to run the models in place of the internal HPC cluster environment that the authors used. We incorporated github workflows building a docker image that was pushed to container registry to run the model with every push. We were not bale to reproduce the figures in the paper as the referenced input files were not shared.</p>
+</section>
+</section>
+<section id="results" class="level1">
+<h1>Results</h1>
+<p>We were able to generate all the model output files and the Shapley plots. Our reproducible workflow is hosted at <a href="https://github.com/Bokola/foodSecurityPred">foodSecurityPred</a>.</p>
+</section>
+<section id="recommendations" class="level1">
+<h1>Recommendations</h1>
+<p>Machine learning environments are fast evolving. To achieve reproducibility requires sharing not just the data and accompanying code, but also the .toml environment listing specific versions of all libraries called. It is advisable to share a containerized image such as a docker image to ensure true reproducibility.</p>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" role="list">
+<div id="ref-busker2024predicting" class="csl-entry" role="listitem">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Tim Busker, Bart van den Hurk, Hans de Moel, Marc van den Homberg, Chiem van Straaten, Rhoda A Odongo, Jeroen CJH Aerts. Predicting food-security crises in the horn of africa using machine learning. Earth’s Future. 2024;12(8):e2023EF004211.</div>
+</div>
+<div id="ref-odongo2023propagation" class="csl-entry" role="listitem">
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">Rhoda A Odongo, Hans De Moel, Anne F Van Loon. Propagation from meteorological to hydrological drought in the horn of africa using both standardized and threshold-based indices. Natural Hazards and Earth System Sciences. 2023;23(6):2365–86.</div>
+</div>
+</div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{okola2026,
+  author = {Okola, Basil},
+  title = {Reproducing {Machine} {Learning} Prediction {Results:} {A}
+    Case for {Predicting} {Food‐Security} {Crises} in the {Horn} of
+    {Africa.}},
+  date = {2026-02-22},
+  url = {https://bokola.github.io/posts/2026-02-22-ML-project-reproducibility/},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-okola2026" class="csl-entry quarto-appendix-citeas" role="listitem">
+<div class="">Basil Okola. Reproducing Machine Learning
+prediction Results: A case for Predicting Food‐Security Crises in the
+Horn of Africa. [Internet]. 2026. Available from: <a href="https://bokola.github.io/posts/2026-02-22-ML-project-reproducibility/">https://bokola.github.io/posts/2026-02-22-ML-project-reproducibility/</a></div>
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/bokola\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

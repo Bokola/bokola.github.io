@@ -6,7 +6,7 @@
   </url>
   <url>
     <loc>https://bokola.github.io/posts.html</loc>
-    <lastmod>2025-08-04T09:35:00.995Z</lastmod>
+    <lastmod>2026-02-22T09:33:12.027Z</lastmod>
   </url>
   <url>
     <loc>https://bokola.github.io/resources.html</loc>
@@ -63,5 +63,9 @@
   <url>
     <loc>https://bokola.github.io/posts/2026-01-21-econometrics/index.html</loc>
     <lastmod>2026-01-21T20:54:09.159Z</lastmod>
+  </url>
+  <url>
+    <loc>https://bokola.github.io/posts/2026-02-22-ML-project-reproducibility/index.html</loc>
+    <lastmod>2026-02-22T09:31:43.645Z</lastmod>
   </url>
 </urlset>
